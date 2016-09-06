@@ -1,0 +1,8 @@
+.vs/
+Debug/
+Release/
+*.VC.*
+ipch/
+*.sdf
+*.vcxproj.user
+Readme.txt
