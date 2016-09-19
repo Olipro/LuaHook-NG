@@ -5,6 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaHook-NG", "LuaHook-NG\LuaHook-NG.vcxproj", "{D3A6F6B8-9FB1-4656-B9D0-394F30628B45}"
 	ProjectSection(ProjectDependencies) = postProject
+		{0386BC51-9AC1-43B0-8BB8-6EC5E770018D} = {0386BC51-9AC1-43B0-8BB8-6EC5E770018D}
 		{C0CCA367-3A2A-4B20-AACD-77294A72B3F2} = {C0CCA367-3A2A-4B20-AACD-77294A72B3F2}
 	EndProjectSection
 EndProject
@@ -13,6 +14,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lua5.1", "Lua5.1\Lua5.1.vcxproj", "{0386BC51-9AC1-43B0-8BB8-6EC5E770018D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HookIPHLPAPI", "HookIPHLPAPI\HookIPHLPAPI.vcxproj", "{61A3EB39-0CBD-4FD4-B0CE-CF1EA66AEDF0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestLuaHookNG", "TestLuaHookNG\TestLuaHookNG.vcxproj", "{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +72,30 @@ Global
 		{61A3EB39-0CBD-4FD4-B0CE-CF1EA66AEDF0}.Release|x64.Build.0 = Release|x64
 		{61A3EB39-0CBD-4FD4-B0CE-CF1EA66AEDF0}.Release|x86.ActiveCfg = Release|Win32
 		{61A3EB39-0CBD-4FD4-B0CE-CF1EA66AEDF0}.Release|x86.Build.0 = Release|Win32
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Debug|x64.ActiveCfg = Debug|x64
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Debug|x64.Build.0 = Debug|x64
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Debug|x86.ActiveCfg = Debug|Win32
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Debug|x86.Build.0 = Debug|Win32
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.dynRelease|x64.ActiveCfg = Release|x64
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.dynRelease|x64.Build.0 = Release|x64
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.dynRelease|x86.ActiveCfg = Release|Win32
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.dynRelease|x86.Build.0 = Release|Win32
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Release|x64.ActiveCfg = Release|x64
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Release|x64.Build.0 = Release|x64
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Release|x86.ActiveCfg = Release|Win32
+		{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}.Release|x86.Build.0 = Release|Win32
+		{311E48DF-91B0-4942-89CE-198456816983}.Debug|x64.ActiveCfg = Debug|x64
+		{311E48DF-91B0-4942-89CE-198456816983}.Debug|x64.Build.0 = Debug|x64
+		{311E48DF-91B0-4942-89CE-198456816983}.Debug|x86.ActiveCfg = Debug|Win32
+		{311E48DF-91B0-4942-89CE-198456816983}.Debug|x86.Build.0 = Debug|Win32
+		{311E48DF-91B0-4942-89CE-198456816983}.dynRelease|x64.ActiveCfg = Release|x64
+		{311E48DF-91B0-4942-89CE-198456816983}.dynRelease|x64.Build.0 = Release|x64
+		{311E48DF-91B0-4942-89CE-198456816983}.dynRelease|x86.ActiveCfg = Release|Win32
+		{311E48DF-91B0-4942-89CE-198456816983}.dynRelease|x86.Build.0 = Release|Win32
+		{311E48DF-91B0-4942-89CE-198456816983}.Release|x64.ActiveCfg = Release|x64
+		{311E48DF-91B0-4942-89CE-198456816983}.Release|x64.Build.0 = Release|x64
+		{311E48DF-91B0-4942-89CE-198456816983}.Release|x86.ActiveCfg = Release|Win32
+		{311E48DF-91B0-4942-89CE-198456816983}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,21 +1,30 @@
 #pragma once
+#include "LuaInterface.h"
 
 #ifndef LUAHOOKNG_EXPORTS
 #pragma comment (lib, "LuaHook-NG.lib")
 #define EXTERNAL __declspec(dllimport)
 #include <functional>
 #include <memory>
-typedef void lua_State;
 #endif
 
-class LuaGameImpl;
+namespace Olipro {
+	class LuaGameImpl;
 
-class EXTERNAL LuaGame final {
+	class EXTERNAL LuaGame final {
 #pragma warning(suppress: 4251)
-	std::unique_ptr<LuaGameImpl> impl;
+		std::unique_ptr<LuaGameImpl> impl;
 
-public:
-	LuaGame(std::function<void(lua_State*)>, std::function<void(lua_State*)>);
-};
+	public:
+		LuaGame(std::function<void(lua_State*, LuaInterface&)>,
+			std::function<void(lua_State*, LuaInterface&)>,
+			std::function<void(lua_State*, LuaInterface&)>,
+			std::function<void(lua_State*, LuaInterface&,
+				const std::string&)>);
+		~LuaGame();
+		LuaGame& operator<<(const std::string&);
+		LuaInterface& GetLua();
+	};
+}
 
 extern "C" EXTERNAL void LuaHookNG(); //dummy function for forcing linkage.

@@ -13,3 +13,13 @@ void LuaInterface::OnNewState(lua_State* L)
 {
 	LuaGameImpl::OnNewState(L, *this);
 }
+
+void LuaInterface::OnCloseState(lua_State* L)
+{
+	LuaGameImpl::OnCloseState(L, *this);
+}
+
+void LuaInterface::OnRequire(lua_State* L, const std::string& name)
+{
+	LuaGameImpl::OnRequire(L, *this, name);
+}

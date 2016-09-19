@@ -188,8 +188,8 @@
     <ClInclude Include="include\ProcessSearcher.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\targetver.h" />
+    <ClInclude Include="include\TempDetour.h" />
     <ClInclude Include="include\Utility.h" />
-    <ClInclude Include="src\TempDetour.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\OldCode.txt" />

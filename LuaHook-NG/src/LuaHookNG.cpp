@@ -13,7 +13,9 @@ LuaHookNG::LuaHookNG(const std::wstring& game) :
 
 DWORD LuaHookNG::DeferredInitialize(LPVOID inst)
 {
-	static_cast<LuaHookNG*>(inst)->console.Run();
+	auto&& self = *static_cast<LuaHookNG*>(inst);
+	self.console.Run();
+	self.LoadClientLibraries();
 	return 0;
 }
 
@@ -24,6 +26,14 @@ LuaInterface& LuaHookNG::GetLuaImplementation(const std::wstring& game)
 	else if (game.rfind(L"payday_win32_release.exe") != game.npos)
 		return PaydayLua::Get();
 	throw "not found";
+}
+
+void LuaHookNG::LoadClientLibraries()
+{
+	using namespace std::experimental::filesystem;
+	for (auto&& i : directory_iterator{ "LuaHookNG" })
+		if (is_regular_file(i.path()))
+			LoadLibraryW(i.path().wstring().c_str());
 }
 
 BOOL APIENTRY DllMain(	HMODULE hModule, DWORD ul_reason_for_call,
@@ -37,7 +47,7 @@ BOOL APIENTRY DllMain(	HMODULE hModule, DWORD ul_reason_for_call,
 			std::array<TCHAR, MAX_PATH> exeName;
 			GetModuleFileName(	GetModuleHandle(nullptr), exeName.data(),
 								MAX_PATH);
-			static LuaHookNG inst{ std::wstring{ exeName.data() } };
+			static Olipro::LuaHookNG inst{ std::wstring{ exeName.data() } };
 		}
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
@@ -45,4 +55,9 @@ BOOL APIENTRY DllMain(	HMODULE hModule, DWORD ul_reason_for_call,
 		break;
 	}
 	return TRUE;
+}
+
+void LuaHookNG()
+{
+
 }

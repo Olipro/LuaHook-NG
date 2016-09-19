@@ -23,6 +23,7 @@
 #include <atomic>
 #include <cstdarg>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <iostream>

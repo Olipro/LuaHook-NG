@@ -3,24 +3,29 @@
 
 namespace Olipro {
 
-	class StackGuard
+	template <typename T, typename ...Args,
+		typename R = std::result_of<T(Args...)>::type,
+		typename = std::enable_if_t<!std::is_void<R>::value>
+	>
+	R SafeCall(T func, Args... args)
 	{
-		size_t esp = 0;
-	public:
-		__forceinline StackGuard() {
-			__asm mov [this]StackGuard.esp, esp
-		}
-		__forceinline ~StackGuard()
-		{
-			__asm mov esp, [this]StackGuard.esp
-		}
-	};
+		size_t savedEsp;
+		__asm mov savedEsp, esp
+		auto ret = func(std::forward<Args>(args)...);
+		__asm mov esp, savedEsp
+		return ret;
+	}
 
-	template <typename T, typename ...Args>
-	__forceinline auto SafeCall(T func, Args... args)
+	template <typename T, typename ...Args,
+		typename R = std::result_of_t<T(Args...)>,
+		typename = std::enable_if_t<std::is_void<R>::value>
+	>
+	void SafeCall(T func, Args... args)
 	{
-		StackGuard guard;
-		return func(args...);
+		size_t savedEsp;
+		__asm mov savedEsp, esp
+		func(std::forward<Args>(args)...);
+		__asm mov esp, savedEsp
 	}
 
 	constexpr auto Str2Uint(LPCSTR str)

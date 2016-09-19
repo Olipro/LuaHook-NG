@@ -2,13 +2,23 @@
 #include "LuaGame.h"
 #include "LuaGameImpl.h"
 
-LuaGame::LuaGame(	std::function<void(lua_State*)> onTick,
-					std::function<void(lua_State*)> onNew) : 
-	impl{std::make_unique<LuaGameImpl>(onTick, onNew)}
+using namespace Olipro;
+
+LuaGame::LuaGame(	std::function<void(lua_State*, LuaInterface&)> onTick,
+					std::function<void(lua_State*, LuaInterface&)> onNew,
+					std::function<void(lua_State*, LuaInterface&)> onClose,
+					std::function<void(lua_State*, LuaInterface&,
+						const std::string&)> onRequire) :
+	impl{std::make_unique<LuaGameImpl>(onTick, onNew, onClose, onRequire)}
 {
 
 }
 
-void LuaHookNG()
+LuaGame::~LuaGame()
 {
+}
+
+LuaGame& LuaGame::operator<<(const std::string& s)
+{
+	return std::cout << s, *this;
 }

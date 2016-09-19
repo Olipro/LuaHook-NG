@@ -10,9 +10,13 @@ namespace Olipro {
 		ConsoleManager console;
 
 		LuaInterface& GetLuaImplementation(const std::wstring&);
-		LuaHookNG(const std::wstring&);
+		void LoadClientLibraries();
 		
 		static DWORD WINAPI DeferredInitialize(LPVOID);
-		friend BOOL APIENTRY ::DllMain(HMODULE, DWORD, LPVOID);
+
+	public:
+		LuaHookNG(const std::wstring&);
 	};
 }
+
+extern "C" EXTERNAL void LuaHookNG();

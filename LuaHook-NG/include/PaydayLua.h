@@ -5,17 +5,21 @@ namespace Olipro {
 
 	class PaydayLua final : public LuaInterface
 	{
-		static LPVOID __fastcall HookDoGameTick(lua_State**, LPVOID,
-												LPVOID, LPCSTR);
+		static void __fastcall HookDoGameTick();
+		static void __fastcall ProcessGameTick(lua_State* L, LPCSTR op);
 		static void __fastcall HookLuaLNewState(lua_State**, int, 
 												int, int, int);
+		static void __fastcall HookLuaClose(lua_State*);
 		static void __cdecl HookLuaSetField(const char*);
+		static void HookRequire(lua_State*);
 
 		struct InGameFunctionSignatures {
 			void(__fastcall *lua_close)(lua_State*);
 			void(__fastcall *lua_createtable)(lua_State*, int, int);
 			void(__fastcall *lua_getfield)(lua_State*, int, const char*);
 			void(__fastcall *lua_gettable)(lua_State*, int);
+			int(__fastcall *lua_load)(lua_State*, lua_Reader, void*,
+				const char*);
 			void*(__fastcall *lua_newuserdata)(lua_State*, size_t);
 			size_t(__fastcall *lua_objlen)(lua_State*, int);
 			int(__fastcall *lua_pcall)(lua_State*, int, int, int);
@@ -31,10 +35,13 @@ namespace Olipro {
 			void(__fastcall *luaC_fullgc)(lua_State*);
 			void(__fastcall *luaC_step)(lua_State*);
 			void(__fastcall *luaD_call)(lua_State*, void*, int);
+			int(__fastcall *luaD_protectedparser)(lua_State*, ZIO*,
+				const char*);
 			lua_State*(__fastcall *luaE_newthread)(lua_State*);
 			void(__fastcall *luaG_errormsg)(lua_State*);
 			int(__fastcall *luaL_loadbuffer)(lua_State*, const char*,
 				size_t, const char*);
+			int(__fastcall *luaL_loadfile)(lua_State*, const char*);
 			void(__fastcall *luaL_newstate)(lua_State**, int, int, int, int);
 			int(__fastcall *luaL_ref)(lua_State*, int);
 			void(__fastcall *luaL_unref)(lua_State*, int, int);
@@ -42,7 +49,8 @@ namespace Olipro {
 														const char*, va_list);
 			void(__fastcall *luaV_settable)(lua_State*, const TValue*,
 				TValue*, StkId);
-			decltype(HookDoGameTick)* tDoGameTick;
+			LPVOID(__thiscall *tDoGameTick)(lua_State**, LPVOID, LPCSTR);
+			decltype(lua_close) tLuaClose;
 			decltype(luaL_newstate) tLuaL_newstate;
 			decltype(lua_setfield) tLua_setfield;
 		} static inGame;
@@ -53,6 +61,7 @@ namespace Olipro {
 
 		int luaL_loadfile(lua_State*, const char*) override;
 		int luaL_loadstring(lua_State*, const char*) override;
+		int luaL_newmetatable(lua_State*, const char*);
 		int luaL_ref(lua_State*, int) override;
 		void luaL_unref(lua_State*, int, int) override;
 		void lua_call(lua_State*, int, int) override;
@@ -66,18 +75,20 @@ namespace Olipro {
 		int lua_getinfo(lua_State*, const char*, lua_Debug*) override;
 		void lua_getfield(lua_State*, int, const char*) override;
 		int lua_getmetatable(lua_State *, int) override;
+		int lua_getstack(lua_State*, int, lua_Debug*) override;
 		void lua_gettable(lua_State*, int) override;
 		int lua_gettop(lua_State*) override;
 		void lua_insert(lua_State*, int) override;
 		int lua_isnumber(lua_State*, int) override;
 		int lua_lessthan(lua_State*, int, int) override;
+		int lua_load(lua_State*, lua_Reader, void*, const char*) override;
 		lua_State* lua_newthread(lua_State*) override;
 		void* lua_newuserdata(lua_State*, size_t) override;
 		int lua_next(lua_State*, int) override;
 		size_t lua_objlen(lua_State*, int) override;
 		int lua_pcall(lua_State*, int, int, int) override;
 		void lua_pushboolean(lua_State*, int) override;
-		void lua_pushcclosure(lua_State*, lua_CFunction, int) override;
+		void lua_pushcclosure(lua_State*, lua_CPPFunction, int) override;
 		const char* lua_pushfstring(lua_State*, const char*, ...) override;
 		void lua_pushinteger(lua_State*, lua_Integer) override;
 		void lua_pushlightuserdata(lua_State*, void*) override;
@@ -102,7 +113,7 @@ namespace Olipro {
 		void lua_settable(lua_State*, int) override;
 		void lua_settop(lua_State*, int) override;
 		int lua_toboolean(lua_State*, int) override;
-		void* lua_tocfunction(lua_State*, int) override;
+		lua_CFunction lua_tocfunction(lua_State*, int) override;
 		int lua_tointeger(lua_State*, int) override;
 		const char* lua_tolstring(lua_State*, int, size_t*) override;
 		lua_Number lua_tonumber(lua_State*, int) override;
@@ -121,7 +132,7 @@ namespace Olipro {
 		
 		const char* lua_getlocal(lua_State*, lua_Debug *, int) override;
 		
-		int lua_getstack(lua_State*, int, lua_Debug*) override;
+		
 		
 		
 		const char* lua_getupvalue(lua_State*, int, int) override;

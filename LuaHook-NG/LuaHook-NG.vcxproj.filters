@@ -83,13 +83,13 @@
     <ClInclude Include="include\PipePair.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
-    <ClInclude Include="src\TempDetour.h">
-      <Filter>Header Files\Include</Filter>
-    </ClInclude>
     <ClInclude Include="include\LuaGame.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
     <ClInclude Include="include\LuaGameImpl.h">
+      <Filter>Header Files\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TempDetour.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,14 +1,21 @@
 #pragma once
+#include <string>
+#include "Lua.h"
 
 namespace Olipro {
 
 	class LuaInterface {
 	protected:
-		void OnGameTick(lua_State* L);
-		void OnNewState(lua_State* L);
+		void OnGameTick(lua_State*);
+		void OnNewState(lua_State*);
+		void OnCloseState(lua_State*);
+		void OnRequire(lua_State*, const std::string&);
 	public:
+		typedef int(*lua_CPPFunction)(lua_State*, LuaInterface&);
+		//Lua C API Functions
 		virtual int luaL_loadfile(lua_State*, const char*) = 0;
 		virtual int luaL_loadstring(lua_State*, const char*) = 0;
+		virtual int luaL_newmetatable(lua_State*, const char*) = 0;
 		virtual int luaL_ref(lua_State*, int) = 0;
 		virtual void luaL_unref(lua_State*, int, int) = 0;
 		virtual void lua_call(lua_State*, int, int) = 0;
@@ -22,18 +29,20 @@ namespace Olipro {
 		virtual void lua_getfield(lua_State*, int, const char*) = 0;
 		virtual int lua_getinfo(lua_State*, const char*, lua_Debug*) = 0;
 		virtual int lua_getmetatable(lua_State *, int) = 0;
+		virtual int lua_getstack(lua_State*, int, lua_Debug*) = 0;
 		virtual void lua_gettable(lua_State*, int) = 0;
 		virtual int lua_gettop(lua_State*) = 0;
 		virtual void lua_insert(lua_State*, int) = 0;
 		virtual int lua_isnumber(lua_State*, int) = 0;
 		virtual int lua_lessthan(lua_State*, int, int) = 0;
+		virtual int lua_load(lua_State*, lua_Reader, void*, const char*) = 0;
 		virtual void* lua_newuserdata(lua_State*, size_t) = 0;
 		virtual lua_State* lua_newthread(lua_State*) = 0;
 		virtual int lua_next(lua_State*, int) = 0;
 		virtual size_t lua_objlen(lua_State*, int) = 0;
 		virtual int lua_pcall(lua_State*, int, int, int) = 0;
 		virtual void lua_pushboolean(lua_State*, int) = 0;
-		virtual void lua_pushcclosure(lua_State*, lua_CFunction, int) = 0;
+		virtual void lua_pushcclosure(lua_State*, lua_CPPFunction, int) = 0;
 		virtual const char* lua_pushfstring(lua_State*, const char *, ...) = 0;
 		virtual void lua_pushinteger(lua_State*, lua_Integer) = 0;
 		virtual void lua_pushlightuserdata(lua_State*, void*) = 0;
@@ -60,7 +69,7 @@ namespace Olipro {
 		virtual int lua_tointeger(lua_State*, int) = 0;
 		virtual const char* lua_tolstring(lua_State*, int, size_t*) = 0;
 		virtual int lua_toboolean(lua_State*, int) = 0;
-		virtual void* lua_tocfunction(lua_State*, int) = 0;
+		virtual lua_CFunction lua_tocfunction(lua_State*, int) = 0;
 		virtual lua_Number lua_tonumber(lua_State*, int) = 0;
 		virtual lua_State* lua_tothread(lua_State*, int) = 0;
 		virtual void* lua_touserdata(lua_State*, int) = 0;
@@ -77,7 +86,7 @@ namespace Olipro {
 		
 		virtual const char* lua_getlocal(lua_State*, lua_Debug *ar, int n) = 0;
 		
-		virtual int lua_getstack(lua_State*, int, lua_Debug*) = 0;
+		
 		virtual const char* lua_getupvalue(lua_State*, int, int) = 0;
 		
 		
@@ -129,98 +138,5 @@ namespace Olipro {
 			virtual void* luaH_new(lua_State*, int, int) = 0;
 			virtual lua_State* luaE_newthread(lua_State*) = 0;
 			virtual int luaD_pcall(lua_State*, void*, void*, ptrdiff_t, ptrdiff_t) = 0;*/
-	};
-
-	enum class MandatoryLua {
-		lua_call,
-		lua_checkstack,
-		lua_close,
-		lua_concat,
-		lua_createtable,
-		lua_equal,
-		lua_gc,
-		lua_getfield,
-		lua_getinfo,
-		lua_getlocal,
-		lua_getmetatable,
-		lua_getstack,
-		lua_gettable,
-		lua_gettop,
-		lua_getupvalue,
-		lua_insert,
-		lua_isnumber,
-		lua_lessthan,
-		lua_load,
-		lua_newstate,
-		lua_newthread,
-		lua_newuserdata,
-		lua_next,
-		lua_objlen,
-		lua_pcall,
-		lua_pushboolean,
-		lua_pushcclosure,
-		lua_pushfstring,
-		lua_pushinteger,
-		lua_pushlstring,
-		lua_pushnil,
-		lua_pushnumber,
-		lua_pushstring,
-		lua_pushthread,
-		lua_pushvalue,
-		lua_pushvfstring,
-		lua_rawequal,
-		lua_rawget,
-		lua_rawgeti,
-		lua_rawset,
-		lua_rawseti,
-		lua_remove,
-		lua_replace,
-		lua_resume,
-		lua_setfield,
-		lua_sethook,
-		lua_setlocal,
-		lua_setmetatable,
-		lua_settable,
-		lua_settop,
-		lua_setupvalue,
-		lua_toboolean,
-		lua_tointeger,
-		lua_tolstring,
-		lua_tonumber,
-		lua_topointer,
-		lua_tothread,
-		lua_touserdata,
-		lua_type,
-		lua_typename,
-		lua_xmove,
-		lua_yield,
-		luaG_errormsg,
-		luaL_argerror,
-		luaL_checkinteger,
-		luaL_checklstring,
-		luaL_checknumber,
-		luaL_checkoption,
-		luaL_checkudata,
-		luaL_error,
-		luaL_loadbuffer,
-		luaL_loadfile,
-		luaL_loadstring,
-		luaL_newstate,
-		luaL_openlib,
-		luaL_optinteger,
-		luaL_optlstring,
-		luaL_optnumber,
-		luaL_ref,
-		luaL_typerror,
-		luaL_unref,
-		luaL_where,
-		luaO_pushvfstring,
-		luaU_dump,
-		luaV_execute,
-		index2adr,
-#ifdef TEC_BUILD
-		SetupSteamFunctions,
-#endif
-		END,
 	};
 }
