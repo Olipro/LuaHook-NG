@@ -20,7 +20,8 @@ LuaGameImpl::LuaGameImpl(	decltype(gameTickClbk) tick,
 LuaGameImpl::~LuaGameImpl()
 {
 	std::unique_lock<decltype(mutex)> lock{ mutex };
-	std::remove(instances.begin(), instances.end(), this);
+	instances.erase(std::remove(instances.begin(), instances.end(), this),
+		instances.end());
 }
 
 void LuaGameImpl::OnGameTick(lua_State* L, LuaInterface& lua)

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "Lua.h"
+#include "lauxlib.h"
 
 namespace Olipro {
 
@@ -13,9 +14,14 @@ namespace Olipro {
 	public:
 		typedef int(*lua_CPPFunction)(lua_State*, LuaInterface&);
 		//Lua C API Functions
+		virtual int luaL_error(lua_State*, const char* fmt, ...) = 0;
+		virtual int luaL_loadbuffer(lua_State*, const char*, size_t,
+									const char*) = 0;
 		virtual int luaL_loadfile(lua_State*, const char*) = 0;
 		virtual int luaL_loadstring(lua_State*, const char*) = 0;
 		virtual int luaL_newmetatable(lua_State*, const char*) = 0;
+		virtual void luaL_openlib(	lua_State*, const char*, const luaL_Reg*,
+									int) = 0;
 		virtual int luaL_ref(lua_State*, int) = 0;
 		virtual void luaL_unref(lua_State*, int, int) = 0;
 		virtual void lua_call(lua_State*, int, int) = 0;
@@ -26,7 +32,11 @@ namespace Olipro {
 		virtual int lua_dump(lua_State*, lua_Writer, void*) = 0;
 		virtual int lua_equal(lua_State *, int, int) = 0;
 		virtual int lua_error(lua_State*) = 0;
+		virtual int lua_gc(lua_State*, int, int) = 0;
 		virtual void lua_getfield(lua_State*, int, const char*) = 0;
+		virtual lua_Hook lua_gethook(lua_State*) = 0;
+		virtual int lua_gethookcount(lua_State*) = 0;
+		virtual int lua_gethookmask(lua_State*) = 0;
 		virtual int lua_getinfo(lua_State*, const char*, lua_Debug*) = 0;
 		virtual int lua_getmetatable(lua_State *, int) = 0;
 		virtual int lua_getstack(lua_State*, int, lua_Debug*) = 0;
@@ -63,6 +73,7 @@ namespace Olipro {
 		virtual void lua_replace(lua_State*, int) = 0;
 		virtual int lua_resume(lua_State*, int) = 0;
 		virtual void lua_setfield(lua_State*, int, const char*) = 0;
+		virtual int lua_sethook(lua_State*, lua_Hook, int, int) = 0;
 		virtual int lua_setmetatable(lua_State*, int) = 0;
 		virtual void lua_settable(lua_State*, int) = 0;
 		virtual void lua_settop(lua_State*, int) = 0;
@@ -79,64 +90,5 @@ namespace Olipro {
 		virtual int lua_yield(lua_State*, int) = 0;
 
 		virtual ~LuaInterface() = default;
-		/*
-		virtual int lua_gc(lua_State*, int, int) = 0;
-		virtual int lua_gethookcount(lua_State*) = 0;
-		virtual int lua_gethookmask(lua_State*) = 0;
-		
-		virtual const char* lua_getlocal(lua_State*, lua_Debug *ar, int n) = 0;
-		
-		
-		virtual const char* lua_getupvalue(lua_State*, int, int) = 0;
-		
-		
-		
-		virtual int lua_load(lua_State*, lua_Reader, void*, const char*, int) = 0;
-		virtual lua_State* lua_newstate(lua_Alloc*, void*) = 0;
-		
-		
-		virtual const char* lua_setlocal(lua_State*, lua_Debug*, int) = 0;
-		virtual int lua_sethook(lua_State*, lua_Debug*, int, int) = 0;
-		virtual const char* lua_setupvalue(lua_State*, int, int) = 0;
-
-		virtual const void* lua_topointer(lua_State*, int) = 0;
-		
-		
-		
-		virtual int luaG_errormsg(lua_State*) = 0;
-		virtual void luaL_addlstring(luaL_Buffer*, const char*, size_t) = 0;
-		virtual int luaL_argerror(lua_State*, int, const char*) = 0;
-		virtual void luaL_buffinit(lua_State*, luaL_Buffer*) = 0;
-		virtual int luaL_checkinteger(lua_State*, int) = 0;
-		virtual const char* luaL_checklstring(lua_State*, int, size_t*) = 0;
-		virtual float luaL_checknumber(lua_State*, int) = 0;
-		virtual int luaL_checkoption(lua_State*, int, const char*, const char *const[]) = 0;
-		virtual void luaL_checkstack(lua_State*, int, const char*) = 0;
-		virtual void* luaL_checkudata(lua_State*, int, const char*) = 0;
-		virtual int luaL_error(lua_State*, const char* fmt, ...) = 0;
-		virtual int luaL_loadbuffer(lua_State*, const char*, size_t, const char*) = 0;
-		
-		virtual int luaL_newmetatable(lua_State*, const char*) = 0;
-		virtual lua_State* luaL_newstate() = 0;
-		virtual void luaL_openlib(lua_State*, const char*, const luaL_Reg*, int) = 0;
-		virtual int luaL_optinteger(lua_State*, int, int) = 0;
-		virtual const char* luaL_optlstring(lua_State*, int, const char*, size_t*) = 0;
-		virtual float luaL_optnumber(lua_State*, int, float) = 0;
-		virtual void luaL_pushresult(luaL_Buffer*) = 0;
-		
-		virtual int luaL_typerror(lua_State*, int, const char*) = 0;
-		
-		virtual void luaL_where(lua_State*, int) = 0;*/
-
-		/*	virtual const char* luaO_pushvfstring(lua_State*, const char*, va_list) = 0;
-			virtual int luaU_dump(lua_State*, const void*, void*, void*) = 0;
-			virtual void luaC_fullgc(lua_State*) = 0;
-			virtual void luaC_gcstep(lua_State*) = 0;
-			virtual int luaH_next(lua_State*, void*, void*) = 0;
-			virtual void luaV_settable(lua_State*, const TValue*, TValue*, TValue*) = 0;
-			virtual TValue* index2adr(lua_State*, int) = 0;
-			virtual void* luaH_new(lua_State*, int, int) = 0;
-			virtual lua_State* luaE_newthread(lua_State*) = 0;
-			virtual int luaD_pcall(lua_State*, void*, void*, ptrdiff_t, ptrdiff_t) = 0;*/
 	};
 }

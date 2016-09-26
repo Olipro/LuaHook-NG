@@ -14,8 +14,10 @@ namespace Olipro {
 		static void HookRequire(lua_State*);
 
 		struct InGameFunctionSignatures {
+			int(__fastcall * lua_checkstack)(lua_State*, int);
 			void(__fastcall *lua_close)(lua_State*);
 			void(__fastcall *lua_createtable)(lua_State*, int, int);
+			int(__fastcall *lua_gc)(lua_State*, int, int);
 			void(__fastcall *lua_getfield)(lua_State*, int, const char*);
 			void(__fastcall *lua_gettable)(lua_State*, int);
 			int(__fastcall *lua_load)(lua_State*, lua_Reader, void*,
@@ -39,6 +41,9 @@ namespace Olipro {
 				const char*);
 			lua_State*(__fastcall *luaE_newthread)(lua_State*);
 			void(__fastcall *luaG_errormsg)(lua_State*);
+			int(__cdecl *luaL_error)(lua_State*, const char*, ...);
+			const char*(__fastcall *luaL_findtable)(lua_State*, int,
+				const char*, int);
 			int(__fastcall *luaL_loadbuffer)(lua_State*, const char*,
 				size_t, const char*);
 			int(__fastcall *luaL_loadfile)(lua_State*, const char*);
@@ -54,26 +59,41 @@ namespace Olipro {
 			decltype(luaL_newstate) tLuaL_newstate;
 			decltype(lua_setfield) tLua_setfield;
 		} static inGame;
+		
+		struct YieldCheck {
+			bool isYield;
+			int nargs;
+		} yieldCheck;
+
 		PaydayLua();
 		
 	public:
 		static PaydayLua& Get();
 
+		int luaL_error(lua_State*, const char* fmt, ...) override;
+		int luaL_loadbuffer(lua_State*, const char*, size_t,
+							const char*) override;
 		int luaL_loadfile(lua_State*, const char*) override;
 		int luaL_loadstring(lua_State*, const char*) override;
 		int luaL_newmetatable(lua_State*, const char*);
+		void luaL_openlib(	lua_State*, const char*,
+							const luaL_Reg*, int) override;
 		int luaL_ref(lua_State*, int) override;
 		void luaL_unref(lua_State*, int, int) override;
 		void lua_call(lua_State*, int, int) override;
-		int lua_checkstack(lua_State *, int) override;
+		int lua_checkstack(lua_State*, int) override;
 		void lua_close(lua_State*) override;
-		void lua_concat(lua_State *, int) override;
-		void lua_createtable(lua_State *, int, int) override;
+		void lua_concat(lua_State*, int) override;
+		void lua_createtable(lua_State*, int, int) override;
 		int lua_dump(lua_State*, lua_Writer, void*) override;
 		int lua_equal(lua_State *, int, int) override;
 		int lua_error(lua_State*) override;
+		int lua_gc(lua_State*, int, int) override;
 		int lua_getinfo(lua_State*, const char*, lua_Debug*) override;
 		void lua_getfield(lua_State*, int, const char*) override;
+		lua_Hook lua_gethook(lua_State*) override;
+		int lua_gethookcount(lua_State*) override;
+		int lua_gethookmask(lua_State*) override;
 		int lua_getmetatable(lua_State *, int) override;
 		int lua_getstack(lua_State*, int, lua_Debug*) override;
 		void lua_gettable(lua_State*, int) override;
@@ -109,6 +129,7 @@ namespace Olipro {
 		void lua_replace(lua_State*, int) override;
 		int lua_resume(lua_State*, int) override;
 		void lua_setfield(lua_State*, int, const char*) override;
+		int lua_sethook(lua_State*, lua_Hook, int, int) override;
 		int lua_setmetatable(lua_State*, int) override;
 		void lua_settable(lua_State*, int) override;
 		void lua_settop(lua_State*, int) override;
@@ -124,71 +145,5 @@ namespace Olipro {
 		void lua_xmove(lua_State*, lua_State*, int) override;
 		int lua_yield(lua_State*, int) override;
 		
-		/*
-		int lua_gc(lua_State*, int, int) override;
-		
-		int lua_gethookcount(lua_State*) override;
-		int lua_gethookmask(lua_State*) override;
-		
-		const char* lua_getlocal(lua_State*, lua_Debug *, int) override;
-		
-		
-		
-		
-		const char* lua_getupvalue(lua_State*, int, int) override;
-		
-		
-		
-		int lua_load(lua_State*, lua_Reader, void*, const char*, int) override;
-		lua_State* lua_newstate(lua_Alloc*, void*) override;
-
-		
-		
-		const char* lua_setlocal(lua_State*, lua_Debug*, int) override;
-		int lua_sethook(lua_State*, lua_Debug*, int, int) override;
-		
-		
-		const char* lua_setupvalue(lua_State*, int, int) override;
-		
-		
-		
-		const void* lua_topointer(lua_State*, int) override;
-		
-		int luaG_errormsg(lua_State*) override;
-		void luaL_addlstring(luaL_Buffer*, const char*, size_t) override;
-		int luaL_argerror(lua_State*, int, const char*) override;
-		void luaL_buffinit(lua_State*, luaL_Buffer*) override;
-		int luaL_checkinteger(lua_State*, int) override;
-		const char* luaL_checklstring(lua_State*, int, size_t*) override;
-		float luaL_checknumber(lua_State*, int) override;
-		int luaL_checkoption(lua_State*, int, const char*, const char *const[]) override;
-		void luaL_checkstack(lua_State*, int, const char*) override;
-		void* luaL_checkudata(lua_State*, int, const char*) override;
-		int luaL_error(lua_State*, const char* fmt, ...) override;
-		int luaL_loadbuffer(lua_State*, const char*, size_t, const char*) override;
-		
-		int luaL_newmetatable(lua_State*, const char*) override;
-		lua_State* luaL_newstate() override;
-		void luaL_openlib(lua_State*, const char*, const luaL_Reg*, int) override;
-		int luaL_optinteger(lua_State*, int, int) override;
-		const char* luaL_optlstring(lua_State*, int, const char*, size_t*) override;
-		float luaL_optnumber(lua_State*, int, float) override;
-		void luaL_pushresult(luaL_Buffer*) override;
-		
-		int luaL_typerror(lua_State*, int, const char*) override;
-		
-		void luaL_where(lua_State*, int) override;
-
-		const char* luaO_pushvfstring(lua_State*, const char*, va_list);
-		int luaU_dump(lua_State*, const void*, void*, void*);
-
-		void luaC_fullgc(lua_State*);
-		void luaC_gcstep(lua_State*);
-		int luaH_next(lua_State*, void*, void*);
-		void luaV_settable(lua_State*, const TValue*, TValue*, TValue*);
-		TValue* index2adr(lua_State*, int);
-		void* luaH_new(lua_State*, int, int);
-		lua_State* luaE_newthread(lua_State*);
-		int luaD_pcall(lua_State*, void*, void*, ptrdiff_t, ptrdiff_t);*/
 	};
 }

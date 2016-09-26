@@ -11,6 +11,18 @@
 // Windows Header Files:
 #include <windows.h>
 
+#include "LuaGame.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "ShellAPI.h"
+#include <atomic>
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <future>
+#include <string>
+#include <thread>
 
+using namespace std::chrono_literals;
 
-// TODO: reference additional headers your program requires here
+#pragma comment (lib, "gmock.lib")

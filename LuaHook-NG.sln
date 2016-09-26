@@ -16,6 +16,13 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HookIPHLPAPI", "HookIPHLPAPI\HookIPHLPAPI.vcxproj", "{61A3EB39-0CBD-4FD4-B0CE-CF1EA66AEDF0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestLuaHookNG", "TestLuaHookNG\TestLuaHookNG.vcxproj", "{2C9D6BDD-08E7-410A-BCEA-7AC48CC1458C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5} = {34681F0D-CE45-415D-B5F2-5C662DFE3BD5}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock", "googletest\googlemock\msvc\2015\gmock.vcxproj", "{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GoogleTest", "GoogleTest", "{017B18FE-FA0E-44CD-BA66-E1DEBBD14215}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,8 +103,21 @@ Global
 		{311E48DF-91B0-4942-89CE-198456816983}.Release|x64.Build.0 = Release|x64
 		{311E48DF-91B0-4942-89CE-198456816983}.Release|x86.ActiveCfg = Release|Win32
 		{311E48DF-91B0-4942-89CE-198456816983}.Release|x86.Build.0 = Release|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.Debug|x64.ActiveCfg = Debug|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.Debug|x86.ActiveCfg = Debug|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.Debug|x86.Build.0 = Debug|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.dynRelease|x64.ActiveCfg = Release|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.dynRelease|x64.Build.0 = Release|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.dynRelease|x86.ActiveCfg = Release|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.dynRelease|x86.Build.0 = Release|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.Release|x64.ActiveCfg = Release|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.Release|x86.ActiveCfg = Release|Win32
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{34681F0D-CE45-415D-B5F2-5C662DFE3BD5} = {017B18FE-FA0E-44CD-BA66-E1DEBBD14215}
 	EndGlobalSection
 EndGlobal

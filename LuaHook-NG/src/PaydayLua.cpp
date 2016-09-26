@@ -24,12 +24,16 @@ PaydayLua::PaydayLua()
 
 	auto doGameTick = inGame.tDoGameTick;
 	sigSearcher.FindFunction(doGameTick,
-		"\x56\xFF\x74\x24\x0C\x8B\xF1\xBA\xEE\xD8\xFF\xFF\x8B\x0E\xE8\x3D"s);
+		"\x56\xFF\x74\x24\x0C\x8B\xF1\xBA\xEE\xD8"s);
+	sigSearcher.FindFunction(inGame.lua_checkstack,
+		"\x56\x8B\xF1\x8B\x4E\x08\x8B\xC1\x2B\x46\x0C\xC1\xF8\x03\x03\xC2"s);
 	sigSearcher.FindFunction(inGame.lua_close,
 		"\x55\x8B\xEC\x83\xE4\xF8\x51\x56\x8B\x71\x10\x8B\x76\x70\x8B\xCE"s);
 	sigSearcher.FindFunction(inGame.lua_createtable,
 		"\x53\x56\x57\x8B\xF9\x8B\xDA\x8B\x4F\x10\x8B\x41\x48\x85\xC0\x74"
 		"\x0B\x48\x89\x41\x48\x8B\xCF\xE8\x64\xB3");
+	sigSearcher.FindFunction(inGame.lua_gc,
+		"\x8B\x44\x24\x04\x53\x56\x8B\xD9\x57\x8B\x73\x10\x33\xFF\xFF\x24"s);
 	sigSearcher.FindFunction(inGame.lua_getfield,
 		"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\x53\x56\x57\x8B\xF9\xE8\x5D"s);
 	sigSearcher.FindFunction(inGame.lua_gettable,
@@ -70,12 +74,16 @@ PaydayLua::PaydayLua()
 		"\x56\x8B\xF1\x57\x8B\x46\x60\x85\xC0\x74\x66\x8B\x7E\x20\x03\xF8"s);
 	sigSearcher.FindFunction(inGame.luaH_getnum,
 		"\x51\x57\x8B\xF9\x8D\x42\xFF\x3B\x47\x1C\x73\x0C\x8B\x47\x0C\x5F"s);
+	sigSearcher.FindFunction(inGame.luaL_findtable,
+		"\x56\x8B\x74\x24\x08\xBA\x01\x00\x00\x00\x8B\xCE\xE8\x4F\xFF\xFF"s);
+	sigSearcher.FindFunction(inGame.luaL_findtable,
+		"83\xEC\x0C\x53\x55\x56\x57\x8B\xF9\xE8\xC2\xE4\xFF\xFF\x8B\x77"s);
 	sigSearcher.FindFunction(inGame.luaL_loadbuffer,
 		"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x20\x8B\x45\x08\x89\x44\x24\x04"s);
 	sigSearcher.FindFunction(inGame.luaL_loadfile,
 		"\x55\x8B\xEC\x83\xE4\xF8\x81\xEC\x20\x02\x00\x00\x53\x55\x56\x57"s);
 	sigSearcher.FindFunction(inGame.luaL_newstate,
-		"\x51\x8B\x44\x24\x10\x53\x56\x57\x8B\xF9\x85\xC0\x75\x07\xB9\x80"s);
+		"\x51\x8B\x44\x24\x10\x53\x56\x57\x8B\xF9\x85\xC0\x75\x07\xB9"s);
 	sigSearcher.FindFunction(inGame.luaL_ref,
 		"\x83\xEC\x0C\x56\x8B\xF1\x57\x8B\x46\x08\x83\xC0\xF8\x3D\xB4\x2B"s);
 	sigSearcher.FindFunction(inGame.luaL_unref,
@@ -172,6 +180,17 @@ void PaydayLua::HookRequire(lua_State* L)
 	lua.lua_setfield(L, LUA_GLOBALSINDEX, "require");
 }
 
+__declspec(naked) int PaydayLua::luaL_error(lua_State*, const char* fmt, ...)
+{
+	__asm jmp inGame.luaL_error;
+}
+
+int PaydayLua::luaL_loadbuffer(lua_State* L, const char* buf, size_t sz,
+	const char* name)
+{
+	return SafeCall(inGame.luaL_loadbuffer, L, buf, sz, name);
+}
+
 int PaydayLua::luaL_loadfile(lua_State* L, const char* filename)
 {
 	return SafeCall(inGame.luaL_loadfile, L, filename);
@@ -179,7 +198,7 @@ int PaydayLua::luaL_loadfile(lua_State* L, const char* filename)
 
 int PaydayLua::luaL_loadstring(lua_State* L, const char *s)
 {
-	return SafeCall(inGame.luaL_loadbuffer, L, s, strlen(s), s);
+	return luaL_loadbuffer(L, s, strlen(s), s);
 }
 
 int PaydayLua::luaL_newmetatable(lua_State* L, const char* tname)
@@ -192,6 +211,36 @@ int PaydayLua::luaL_newmetatable(lua_State* L, const char* tname)
 	lua_pushvalue(L, -1);
 	lua_setfield(L, LUA_REGISTRYINDEX, tname);  /* registry.name = metatable */
 	return 1;
+}
+
+void PaydayLua::luaL_openlib(lua_State* L, const char* libname,
+	const luaL_Reg* l, int nup)
+{
+	if (libname) {
+		int size = 0;
+		while (l++->name)
+			++size;
+		SafeCall(inGame.luaL_findtable, L, LUA_REGISTRYINDEX, "_LOADED",
+			size);
+			lua_getfield(L, -1, libname);
+			if (!lua_istable(L, -1)) {
+				lua_pop(L, 1);
+				if (SafeCall(inGame.luaL_findtable, L, LUA_GLOBALSINDEX,
+					libname, size) != NULL)
+					luaL_error(L, "name conflict for module " LUA_QS, libname);
+				lua_pushvalue(L, -1);
+				lua_setfield(L, -3, libname);
+			}
+			lua_remove(L, -2);
+			lua_insert(L, -(nup + 1));
+	}
+	for (; l->name; l++) {
+		for (int i = 0; i < nup; i++)
+			lua_pushvalue(L, -nup);
+		SafeCall(inGame.lua_pushcclosure, L, l->func, nup);
+		lua_setfield(L, -(nup + 2), l->name);
+	}
+	lua_pop(L, nup);
 }
 
 int PaydayLua::luaL_ref(lua_State* L, int t)
@@ -215,7 +264,14 @@ int PaydayLua::luaL_ref(lua_State* L, int t)
 
 void PaydayLua::luaL_unref(lua_State* L, int t, int ref)
 {
-	return SafeCall(inGame.luaL_unref, L, t, ref);
+	const int freelistRef = 0;
+	if (ref >= 0) {
+		t = t > 0 || t <= LUA_REGISTRYINDEX ? t : lua_gettop(L) + t + 1;
+		lua_rawgeti(L, t, freelistRef);
+		lua_rawseti(L, t, ref);
+		lua_pushinteger(L, ref);
+		lua_rawseti(L, t, freelistRef);
+	}
 }
 
 void PaydayLua::lua_call(lua_State* L, int nargs, int nresults)
@@ -228,7 +284,7 @@ void PaydayLua::lua_call(lua_State* L, int nargs, int nresults)
 
 int PaydayLua::lua_checkstack(lua_State* L, int size)
 {
-	return Lua::lua_checkstack(L, size);
+	return SafeCall(inGame.lua_checkstack, L, size);
 }
 
 void PaydayLua::lua_close(lua_State* L)
@@ -262,9 +318,29 @@ int PaydayLua::lua_error(lua_State* L)
 	return 0;
 }
 
+int PaydayLua::lua_gc(lua_State* L, int what, int data)
+{
+	return SafeCall(inGame.lua_gc, L, data, what); //operands switched
+}
+
 void PaydayLua::lua_getfield(lua_State* L, int idx, const char* name)
 {
 	SafeCall(inGame.lua_getfield, L, idx, name);
+}
+
+lua_Hook PaydayLua::lua_gethook(lua_State* L)
+{
+	return Lua::lua_gethook(L);
+}
+
+int PaydayLua::lua_gethookcount(lua_State* L)
+{
+	return Lua::lua_gethookcount(L);
+}
+
+int PaydayLua::lua_gethookmask(lua_State* L)
+{
+	return Lua::lua_gethookmask(L);
 }
 
 int PaydayLua::lua_getinfo(lua_State* L, const char* s, lua_Debug* debug)
@@ -355,14 +431,29 @@ void PaydayLua::lua_pushboolean(lua_State* L, int b)
 void PaydayLua::lua_pushcclosure(lua_State* L, lua_CPPFunction func, int nups)
 {
 	lua_pushlightuserdata(L, func);
+	lua_insert(L, -nups - 1);
+	lua_pushinteger(L, nups);
+	lua_insert(L, -nups - 1);
 	SafeCall(inGame.lua_pushcclosure, L, [](auto L) {
 		auto&& lua = Get();
-		lua_Debug info;
-		lua.lua_getstack(L, 0, &info);
-		auto funcPtr = lua.lua_touserdata(L, lua_upvalueindex(info.nups));
-		auto func = static_cast<lua_CPPFunction>(funcPtr);
-		return func(L, lua);
-	}, nups + 1);
+		auto nups = lua.lua_tointeger(L, lua_upvalueindex(2));
+		auto narg = lua.lua_gettop(L);
+		for (auto i = 1; i <= nups; i++)
+			lua.lua_pushvalue(L, lua_upvalueindex(i+2));
+		SafeCall(inGame.lua_pushcclosure, L, [](auto L) {
+			auto&& lua = Get();
+			auto f = static_cast<lua_CPPFunction>(lua.lua_touserdata(L, -1));
+			lua.lua_remove(L, -1);
+			lua.yieldCheck.isYield = false;
+			auto ret = f(L, lua);
+			return !lua.yieldCheck.isYield ? ret : lua.yieldCheck.nargs;
+		}, nups);
+		lua.lua_insert(L, 1);
+		lua.lua_pushvalue(L, lua_upvalueindex(1));
+		lua.lua_call(L, narg + 1, LUA_MULTRET);
+		return !lua.yieldCheck.isYield ? lua.lua_gettop(L) : 
+									Lua::lua_yield(L, lua.yieldCheck.nargs);
+	}, nups + 2);
 }
 
 const char* PaydayLua::lua_pushfstring(lua_State* L, const char* s, ...)
@@ -468,6 +559,11 @@ void PaydayLua::lua_setfield(lua_State* L, int index, const char* k)
 	SafeCall(inGame.lua_setfield, L, index, k);
 }
 
+int PaydayLua::lua_sethook(lua_State* L, lua_Hook f, int mask, int count)
+{
+	return Lua::lua_sethook(L, f, mask, count);
+}
+
 int PaydayLua::lua_setmetatable(lua_State* L, int index)
 {
 	return Lua::lua_setmetatable(L, index);
@@ -537,5 +633,6 @@ void PaydayLua::lua_xmove(lua_State* from, lua_State* to, int n)
 
 int PaydayLua::lua_yield(lua_State* L, int nresults)
 {
-	return Lua::lua_yield(L, nresults);
+	yieldCheck = { true, nresults };
+	return -1;
 }
