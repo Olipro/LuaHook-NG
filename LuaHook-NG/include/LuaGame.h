@@ -1,7 +1,10 @@
 #pragma once
 #include "LuaInterface.h"
 #include <functional>
+#include <functional>
 #include <memory>
+#include <string>
+#include "Lua.h"
 
 #ifndef LUAHOOKNG_EXPORTS
 #pragma comment (lib, "LuaHook-NG.lib")
@@ -16,11 +19,15 @@ namespace Olipro {
 		const std::unique_ptr<LuaGameImpl> impl;
 
 	public:
-		LuaGame(std::function<void(lua_State*, LuaInterface&)>,
-			std::function<void(lua_State*, LuaInterface&)> = nullptr,
-			std::function<void(lua_State*, LuaInterface&)> = nullptr,
-			std::function<void(lua_State*, LuaInterface&,
-				const std::string&)> = nullptr);
+		struct CallbackArgs {
+			const std::function<void(lua_State*, LuaInterface&)> onTick;
+			const std::function<void(lua_State*, LuaInterface&)> onNew;
+			const std::function<void(lua_State*, LuaInterface&)> onClose;
+			const std::function<void(lua_State*, LuaInterface&,
+											const std::string&)> onRequire;
+		};
+
+		LuaGame(const CallbackArgs&);
 		~LuaGame();
 		LuaGame& operator<<(const std::string&);
 	};

@@ -30,45 +30,45 @@ struct TestCallbacks : public ::testing::Test
 };
 
 TEST_F(TestCallbacks, TestOnNewStateIsCalled) {
-	LuaGame game{ nullptr, GenerateLambda() };
+	LuaGame game{ { nullptr, GenerateLambda() } };
 	DoWaitTest();
 }
 
 TEST_F(TestCallbacks, TestCloseStateIsCalled) {
-	LuaGame game{ nullptr, nullptr, GenerateLambda() };
+	LuaGame game{ { nullptr, nullptr, GenerateLambda() } };
 	DoWaitTest();
 }
 
 TEST_F(TestCallbacks, TestRequireIsCalled) {
-	LuaGame game{ nullptr, nullptr, nullptr, [this](lua_State* L,
+	LuaGame game{ { nullptr, nullptr, nullptr, [this](lua_State* L,
 		LuaInterface& lua, const std::string& s) {
 		Callback(L, lua);
 		EXPECT_NE(s, "");
-	} };
+	} } };
 	DoWaitTest();
 }
 
 TEST_F(TestCallbacks, TestGameTickIsCalled) {
-	LuaGame game{ GenerateLambda() };
+	LuaGame game{ { GenerateLambda() } };
 	DoWaitTest();
 }
 
 TEST_F(TestCallbacks, TestGettingIntegerViaLuaFunction) {
-	LuaGame game{ [this](lua_State* L, LuaInterface& lua) {
+	LuaGame game{ { [this](lua_State* L, LuaInterface& lua) {
 		const int expectedValue = 12345;
 		lua.luaL_loadstring(L, "return ...");
 		lua.lua_pushinteger(L, expectedValue);
 		lua.lua_call(L, 1, 1);
 		EXPECT_EQ(lua.lua_tointeger(L, -1), expectedValue);
 		wasInvoked.set_value(true);
-	}};
+	} } };
 	DoWaitTest(1s);
 }
 
 TEST_F(TestCallbacks, TestLuaLRefRetainsCorrectReference) {
 	const int testValue = 123456;
 	int ref = 0, ud = 0;
-	LuaGame game{ [&](lua_State* L, LuaInterface& lua) {
+	LuaGame game{ {[&](lua_State* L, LuaInterface& lua) {
 		if (ref == 0) {
 			ud = testValue;
 			*static_cast<int**>(lua.lua_newuserdata(L, sizeof(int))) = &ud;
@@ -87,12 +87,12 @@ TEST_F(TestCallbacks, TestLuaLRefRetainsCorrectReference) {
 			ref = -2;
 			wasInvoked.set_value(true);
 		}
-		} };
+	} } };
 	DoWaitTest(2s);
 }
 
 TEST_F(TestCallbacks, TestLuaPCallHandlesErrors) {
-	LuaGame game{ [this](lua_State* L, LuaInterface& l) {
+	LuaGame game{ { [this](lua_State* L, LuaInterface& l) {
 		l.lua_pushcclosure(L, [](lua_State* L, LuaInterface& l) {
 			EXPECT_EQ(l.lua_gettop(L), 1);
 			EXPECT_EQ(l.lua_type(L, 1), LUA_TSTRING);
@@ -104,19 +104,19 @@ TEST_F(TestCallbacks, TestLuaPCallHandlesErrors) {
 		EXPECT_EQ(l.lua_type(L, -1), LUA_TBOOLEAN);
 		EXPECT_EQ(l.lua_toboolean(L, -1), TRUE);
 		wasInvoked.set_value(true);
-} };
+	} } };
 	DoWaitTest(2s);
 }
 
 TEST_F(TestCallbacks, TestLuaLoad) {
-	LuaGame game{ [this](lua_State* L, LuaInterface& l) {
+	LuaGame game{ { [this](lua_State* L, LuaInterface& l) {
 		const int testValue = 123456;
 		int val = testValue;
 		auto ret = l.lua_load(L, [](lua_State* L, void* ud, size_t* size) -> const char* {
 			static bool wasLoaded = false;
 			if (wasLoaded)
 				return wasLoaded = false, *size = 0, nullptr;
-			static const std::string s{ std::string{"return "} + std::to_string(*static_cast<int*>(ud)) };
+			static const std::string s{ std::string{"return "} +std::to_string(*static_cast<int*>(ud)) };
 			*size = s.length();
 			wasLoaded = true;
 			return s.c_str();
@@ -124,12 +124,12 @@ TEST_F(TestCallbacks, TestLuaLoad) {
 		l.lua_call(L, 0, 0);
 		EXPECT_EQ(ret, 0);
 		wasInvoked.set_value(true);
-	} };
+	} } };
 	DoWaitTest(2s);
 }
 
 TEST_F(TestCallbacks, TestFunctionWithClosures) {
-	LuaGame game{ [this](lua_State* L, LuaInterface& l) {
+	LuaGame game{ { [this](lua_State* L, LuaInterface& l) {
 		l.lua_pushinteger(L, 123456);
 		l.lua_pushboolean(L, true);
 		l.lua_pushstring(L, "test");
@@ -146,12 +146,12 @@ TEST_F(TestCallbacks, TestFunctionWithClosures) {
 		l.lua_call(L, 0, 1);
 		EXPECT_EQ(l.lua_tointeger(L, -1), 654321);
 		wasInvoked.set_value(true);
-	} };
+	} } };
 	DoWaitTest(2s);
 }
 
 TEST_F(TestCallbacks, TestLuaThreadYieldResumeAndXmove) {
-	LuaGame game{ [this](lua_State* L, LuaInterface& l) {
+	LuaGame game{ { [this](lua_State* L, LuaInterface& l) {
 		auto T = l.lua_newthread(L);
 		EXPECT_EQ(l.luaL_loadstring(T, R"_(
 		local num, f = ...
@@ -173,12 +173,12 @@ TEST_F(TestCallbacks, TestLuaThreadYieldResumeAndXmove) {
 		l.lua_xmove(T, L, 1);
 		EXPECT_EQ(l.lua_tointeger(L, -1), 987654);
 		wasInvoked.set_value(true);
-	} };
+	} } };
 	DoWaitTest(2s);
 }
 
 TEST_F(TestCallbacks, TestLuaTableIterationWorks) {
-	LuaGame game{ [this](lua_State* L, LuaInterface& l) {
+	LuaGame game{ { [this](lua_State* L, LuaInterface& l) {
 		EXPECT_EQ(l.luaL_loadstring(L, "return {9,8,7,6,5,4,3,2,1}"), 0);
 		l.lua_call(L, 0, 1);
 		EXPECT_EQ(l.lua_type(L, -1), LUA_TTABLE);
@@ -191,7 +191,7 @@ TEST_F(TestCallbacks, TestLuaTableIterationWorks) {
 			l.lua_pop(L, 1);
 		}
 		wasInvoked.set_value(true);
-	} };
+	} } };
 	DoWaitTest(2s);
 }
 

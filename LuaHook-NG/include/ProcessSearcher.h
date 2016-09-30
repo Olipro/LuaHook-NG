@@ -54,5 +54,16 @@ namespace Olipro
 				result : nullptr);
 			return obj;
 		}
+
+		template <typename T>
+		T& FindFunction(const std::string& signature)
+		{
+			auto needle = reinterpret_cast<const BYTE* const>(
+				signature.c_str());
+			auto result = std::search(moduleBase, moduleBase + moduleSize,
+				needle, needle + signature.length());
+			return *reinterpret_cast<std::add_pointer_t<T>>(
+				result != (moduleBase + moduleSize) ? result : nullptr);
+		}
 	};
 }

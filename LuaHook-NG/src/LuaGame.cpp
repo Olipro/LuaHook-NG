@@ -4,12 +4,9 @@
 
 using namespace Olipro;
 
-LuaGame::LuaGame(	std::function<void(lua_State*, LuaInterface&)> onTick,
-					std::function<void(lua_State*, LuaInterface&)> onNew,
-					std::function<void(lua_State*, LuaInterface&)> onClose,
-					std::function<void(lua_State*, LuaInterface&,
-						const std::string&)> onRequire) :
-	impl{std::make_unique<LuaGameImpl>(onTick, onNew, onClose, onRequire)}
+LuaGame::LuaGame(const CallbackArgs& clbkArgs) :
+	impl{std::make_unique<LuaGameImpl>(clbkArgs.onTick, clbkArgs.onNew,
+		clbkArgs.onClose, clbkArgs.onRequire)}
 {
 
 }

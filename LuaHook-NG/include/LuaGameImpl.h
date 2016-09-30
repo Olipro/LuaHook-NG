@@ -7,11 +7,11 @@ namespace Olipro {
 		static std::vector<LuaGameImpl*> instances;
 		static std::shared_mutex mutex;
 
-		std::function<void(lua_State*, LuaInterface&)> gameTickClbk;
-		std::function<void(lua_State*, LuaInterface&)> newStateClbk;
-		std::function<void(lua_State*, LuaInterface&)> closeStateClbk;
-		std::function<void(lua_State*, LuaInterface&,
-			const std::string&)> requireClbk;
+		const std::function<void(lua_State*, LuaInterface&)> gameTickClbk;
+		const std::function<void(lua_State*, LuaInterface&)> newStateClbk;
+		const std::function<void(lua_State*, LuaInterface&)> closeStateClbk;
+		const std::function<void(lua_State*, LuaInterface&,
+										const std::string&)> requireClbk;
 
 		static void OnGameTick(lua_State*, LuaInterface&);
 		static void OnNewState(lua_State*, LuaInterface&);

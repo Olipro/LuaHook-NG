@@ -45,6 +45,9 @@
     <ClCompile Include="src\LuaGameImpl.cpp">
       <Filter>Source Files\src</Filter>
     </ClCompile>
+    <ClCompile Include="src\PaydayLua\InGameWin32.cpp">
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files\Include</Filter>
     </ClInclude>
     <ClInclude Include="include\TempDetour.h">
+      <Filter>Header Files\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PaydayLua\InGameWin32.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
   </ItemGroup>
