@@ -2,6 +2,7 @@
 #include "ConsoleManager.h"
 
 using namespace Olipro;
+using namespace std::chrono_literals;
 
 ConsoleManager::ConsoleManager()
 {

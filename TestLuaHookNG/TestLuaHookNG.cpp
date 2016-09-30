@@ -150,7 +150,7 @@ TEST_F(TestCallbacks, TestFunctionWithClosures) {
 	DoWaitTest(2s);
 }
 
-TEST_F(TestCallbacks, TestLuaThreadYieldAndResume) {
+TEST_F(TestCallbacks, TestLuaThreadYieldResumeAndXmove) {
 	LuaGame game{ [this](lua_State* L, LuaInterface& l) {
 		auto T = l.lua_newthread(L);
 		EXPECT_EQ(l.luaL_loadstring(T, R"_(
@@ -169,6 +169,9 @@ TEST_F(TestCallbacks, TestLuaThreadYieldAndResume) {
 		l.lua_pushinteger(T, 987654);
 		EXPECT_EQ(l.lua_resume(T, 1), 0);
 		EXPECT_EQ(l.lua_tointeger(T, -1), 456789);
+		l.lua_pushinteger(T, 987654);
+		l.lua_xmove(T, L, 1);
+		EXPECT_EQ(l.lua_tointeger(L, -1), 987654);
 		wasInvoked.set_value(true);
 	} };
 	DoWaitTest(2s);

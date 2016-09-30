@@ -1,5 +1,4 @@
 #pragma once
-#include "ConsoleManager.h"
 #include "LuaInterface.h"
 
 BOOL APIENTRY DllMain(HMODULE, DWORD, LPVOID);
@@ -7,7 +6,6 @@ BOOL APIENTRY DllMain(HMODULE, DWORD, LPVOID);
 namespace Olipro {
 	class LuaHookNG {
 		LuaInterface& luaInstance;
-		ConsoleManager console;
 
 		LuaInterface& GetLuaImplementation(const std::wstring&);
 		void LoadClientLibraries();

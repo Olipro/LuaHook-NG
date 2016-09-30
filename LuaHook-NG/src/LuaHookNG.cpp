@@ -14,7 +14,6 @@ LuaHookNG::LuaHookNG(const std::wstring& game) :
 DWORD LuaHookNG::DeferredInitialize(LPVOID inst)
 {
 	auto&& self = *static_cast<LuaHookNG*>(inst);
-	self.console.Run();
 	self.LoadClientLibraries();
 	return 0;
 }

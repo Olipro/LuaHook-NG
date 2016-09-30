@@ -7,11 +7,11 @@ namespace Olipro {
 	{
 		static void __fastcall HookDoGameTick();
 		static void __fastcall ProcessGameTick(lua_State* L, LPCSTR op);
-		static void __fastcall HookLuaLNewState(lua_State**, int, 
+		static void __fastcall HookLuaLNewState(lua_State**, int,
 												int, int, int);
 		static void __fastcall HookLuaClose(lua_State*);
 		static void __cdecl HookLuaSetField(const char*);
-		static void HookRequire(lua_State*);
+		static void __cdecl HookRequire(lua_State*);
 
 		struct InGameFunctionSignatures {
 			int(__fastcall * lua_checkstack)(lua_State*, int);

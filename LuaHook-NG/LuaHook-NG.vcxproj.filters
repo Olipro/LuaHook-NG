@@ -36,12 +36,6 @@
     <ClCompile Include="src\Utility.cpp">
       <Filter>Source Files\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ConsoleManager.cpp">
-      <Filter>Source Files\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PipePair.cpp">
-      <Filter>Source Files\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\LuaInterface.cpp">
       <Filter>Source Files\src</Filter>
     </ClCompile>
@@ -75,12 +69,6 @@
       <Filter>Header Files\Include</Filter>
     </ClInclude>
     <ClInclude Include="include\ProcessSearcher.h">
-      <Filter>Header Files\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ConsoleManager.h">
-      <Filter>Header Files\Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PipePair.h">
       <Filter>Header Files\Include</Filter>
     </ClInclude>
     <ClInclude Include="include\LuaGame.h">
