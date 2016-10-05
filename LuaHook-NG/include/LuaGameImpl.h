@@ -17,6 +17,8 @@ namespace Olipro {
 		static void OnNewState(lua_State*, LuaInterface&);
 		static void OnCloseState(lua_State*, LuaInterface&);
 		static void OnRequire(lua_State*, LuaInterface&, const std::string&);
+		template <typename T>
+			static void CallWrapper(lua_State*, LuaInterface&, T);
 		friend class LuaInterface;
 
 	public:

@@ -35,11 +35,9 @@ void PaydayLua::ProcessGameTick(lua_State* L, const char* op)
 void PaydayLua::ProcessNewState(lua_State* L)
 {
 	auto&& self = Get();
-	SafeCall(self.inGame.functions.lua_pushcclosure, L, [](auto L) {
-		Get().OnNewState(L);
-		HookRequire(L);
-		return 0;
-	}, 0);
+	self.packageLoaded.clear();
+	self.OnNewState(L);
+	HookRequire(L);
 	self.lua_pcall(L, 0, 0, 0);
 }
 
@@ -58,12 +56,16 @@ void PaydayLua::HookRequire(lua_State* L)
 		lua.lua_pushvalue(L, lua_upvalueindex(1));
 		lua.lua_insert(L, 1);
 		lua.lua_call(L, lua.lua_gettop(L) - 1, LUA_MULTRET);
-		SafeCall(lua.inGame.functions.lua_pushcclosure, L, [](auto L) {
-			auto name = static_cast<std::string*>(Get().lua_touserdata(L, 1));
-			return Get().OnRequire(L, *name), 0;
-		}, 0);
-		lua.lua_pushlightuserdata(L, &name);
-		lua.lua_call(L, 1, 0);
+		if (lua.packageLoaded.find(name) == lua.packageLoaded.end()) {
+			lua.packageLoaded.insert(name);
+			SafeCall(lua.inGame.functions.lua_pushcclosure, L, [](auto L) {
+				auto&& name = *static_cast<std::string*>(
+					Get().lua_touserdata(L, 1));
+				return Get().OnRequire(L, name), 0;
+			}, 0);
+			lua.lua_pushlightuserdata(L, &name);
+			lua.lua_call(L, 1, 0);
+		}
 		return lua.lua_gettop(L);
 	}, 1);
 	lua.lua_setfield(L, LUA_GLOBALSINDEX, "require");
@@ -235,7 +237,7 @@ int PaydayLua::lua_gethookmask(lua_State* L)
 
 int PaydayLua::lua_getinfo(lua_State* L, const char* s, lua_Debug* debug)
 {
-	return Lua::lua_getinfo(L, s, debug);
+	return SafeCall(inGame.functions.lua_getinfo, L, s, debug);
 }
 
 int PaydayLua::lua_getmetatable(lua_State* L, int index)
@@ -344,6 +346,11 @@ void PaydayLua::lua_pushcclosure(lua_State* L, lua_CPPFunction func, int nups)
 		return !lua.yieldCheck.isYield ? lua.lua_gettop(L) :
 									Lua::lua_yield(L, lua.yieldCheck.nargs);
 	}, nups + 2);
+}
+
+void PaydayLua::lua_pushrawcclosure(lua_State* L, lua_CFunction func, int nups)
+{
+	SafeCall(inGame.functions.lua_pushcclosure, L, func, nups);
 }
 
 const char* PaydayLua::lua_pushfstring(lua_State* L, const char* s, ...)

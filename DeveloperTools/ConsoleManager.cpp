@@ -3,8 +3,10 @@
 
 using namespace Olipro;
 using namespace std::chrono_literals;
+using namespace std::placeholders;
 
-ConsoleManager::ConsoleManager()
+ConsoleManager::ConsoleManager() : 
+	game{ { std::bind(&ConsoleManager::LuaCodeRunner, this, _1, _2) } }
 {
 	if (!AllocConsole())
 		throw "failed to Allocate console";
@@ -55,22 +57,57 @@ ConsoleManager::ConsoleManager()
 	std::wcerr.rdbuf(usrWcerr.rdbuf());
 	std::wcin.rdbuf(usrWcin.rdbuf());
 	std::ios::sync_with_stdio();
+	std::cout.setf(std::ios::unitbuf);
+	std::wcout.setf(std::ios::unitbuf);
 }
 
 void ConsoleManager::Run()
 {
 	outThread = AutoJoinThread{ std::thread(&ConsoleManager::ProcessPipe, this,
-		stdOut.read(), realStdOut, nullptr, true) };
+		stdOut.read(), realStdOut, &logFile, true) };
 	errThread = AutoJoinThread{ std::thread(&ConsoleManager::ProcessPipe, this,
-		stdErr.read(), realStdErr, nullptr, true) };
+		stdErr.read(), realStdErr, &logFile, false) };
 	inThread = AutoJoinThread{ std::thread(&ConsoleManager::ProcessPipe, this,
-		realStdIn, stdIn.write(), nullptr, true) };
+		realStdIn, stdIn.write(), &logFile, false) };
+	consoleInput = { &ConsoleManager::ConsoleInputReader, this };
 }
 
-void ConsoleManager::TextWasDisplayed()
+void ConsoleManager::WriteToPrompt(const std::string& prompt)
 {
-	const std::string prompt{ "\nLua> " };
 	WriteFile(realStdOut, prompt.c_str(), prompt.length(), nullptr, nullptr);
+}
+
+std::string ConsoleManager::ConsoleInputReader()
+{
+	std::string str;
+	if (!std::cin.eof())
+	{
+		skip = true;
+		std::cout << "\nLua> ";
+		std::getline(std::cin, str);
+	}
+	return str;
+}
+
+void ConsoleManager::LuaCodeRunner(lua_State* L, LuaInterface& lua)
+{
+	if (consoleInput.wait_for(0s) == std::future_status::ready)
+	{
+		auto result = consoleInput.get();
+		auto str = result.get();
+		const char* err = nullptr, *out = nullptr;
+		if (lua.luaL_loadbuffer(L, str.c_str(), str.length(), "Console"))
+			err = lua.lua_tolstring(L, -1, nullptr);
+		else
+			if (lua.lua_pcall(L, 0, LUA_MULTRET, 0))
+				err = lua.lua_tolstring(L, -1, nullptr);
+			else if (lua.lua_gettop(L))
+				out = lua.lua_tolstring(L, -1, nullptr);
+		if (err)
+			std::cerr << err << "\n";
+		if (out)
+			std::cout << out << "\n";
+	}
 }
 
 void ConsoleManager::ProcessPipe(HANDLE rPipe, HANDLE wPipe,
@@ -79,24 +116,22 @@ void ConsoleManager::ProcessPipe(HANDLE rPipe, HANDLE wPipe,
 	const size_t bufSize = 4096, timeout = 200;
 	DWORD numBytes, remBytes;
 	std::array<char, 4096> buf;
+	bool shouldSkip = true;
 	while (ReadFile(rPipe, buf.data(), buf.size(), &numBytes, nullptr)
 		&& numBytes)
 	{
 		if (file != nullptr)
-			file->write(buf.data(), numBytes);
+			file->write(buf.data(), numBytes), file->flush();
 		WriteFile(wPipe, buf.data(), numBytes, &remBytes, nullptr);
-		if (doRefresh && buf.back() == '\n')
+		if (doRefresh && buf.back() == '\n' &&
+			!skip.compare_exchange_strong(shouldSkip, false))
 		{
-			if (skipCounter == 0)
-			{
-				for (auto i = 0; PeekNamedPipe(rPipe, nullptr, 0, nullptr,
-					&remBytes, nullptr), !remBytes && i < timeout; i++)
-					std::this_thread::sleep_for(1ms);
-				if (!remBytes)
-					TextWasDisplayed();
-			}
-			else
-				skipCounter--;
+			shouldSkip = true;
+			for (auto i = 0; PeekNamedPipe(rPipe, nullptr, 0, nullptr,
+				&remBytes, nullptr), !remBytes && i < timeout; i++)
+				std::this_thread::sleep_for(1ms);
+			if (!remBytes)
+				WriteToPrompt("\nLua> ");
 		}
 	}
 }

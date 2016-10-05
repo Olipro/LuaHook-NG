@@ -11,6 +11,7 @@ namespace Olipro {
 		static void ProcessCloseState(lua_State*);
 		static void __cdecl HookRequire(lua_State*);
 		
+		std::unordered_set<std::string> packageLoaded{ 200 };
 		struct YieldCheck {
 			bool isYield;
 			int nargs;
@@ -61,6 +62,7 @@ namespace Olipro {
 		int lua_pcall(lua_State*, int, int, int) override;
 		void lua_pushboolean(lua_State*, int) override;
 		void lua_pushcclosure(lua_State*, lua_CPPFunction, int) override;
+		void lua_pushrawcclosure(lua_State*, lua_CFunction, int) override;
 		const char* lua_pushfstring(lua_State*, const char*, ...) override;
 		void lua_pushinteger(lua_State*, lua_Integer) override;
 		void lua_pushlightuserdata(lua_State*, void*) override;

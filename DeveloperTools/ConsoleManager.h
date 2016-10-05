@@ -1,5 +1,8 @@
 #pragma once
+#include "AutoJoinThread.h"
+#include "CyclicFuture.h"
 #include "PipePair.h"
+#include <LuaGame.h>
 
 namespace Olipro {
 	class ConsoleManager {
@@ -8,19 +11,19 @@ namespace Olipro {
 		std::ofstream usrCout, usrCerr;
 		std::wifstream usrWcin;
 		std::wofstream usrWcout, usrWcerr;
+		std::ofstream logFile{ "DevLog.txt", std::ofstream::out };
 		HANDLE realStdOut, realStdErr, realStdIn;
-		std::atomic_char skipCounter;
-		class AutoJoinThread {
-			std::thread t;
-		public:
-			AutoJoinThread() = default;
-			AutoJoinThread(std::thread&& thread) : t(std::move(thread)) {}
-			~AutoJoinThread() { if (t.joinable()) t.join(); }
-			AutoJoinThread& operator=(AutoJoinThread&&) = default;
-		} inThread, outThread, errThread;
+		std::atomic_bool skip;
+		AutoJoinThread inThread, outThread, errThread;
+		CyclicFuture<std::string> consoleInput;
+		const LuaGame game;
 
 		void ProcessPipe(HANDLE, HANDLE, std::ofstream* const, bool);
-		void TextWasDisplayed();
+		void WriteToPrompt(const std::string&);
+		std::string ConsoleInputReader();
+		void LuaCodeRunner(lua_State*, LuaInterface&);
+
+		
 	public:
 		ConsoleManager();
 		void Run();

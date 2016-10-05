@@ -16,6 +16,7 @@
 #include <atomic>
 #include <chrono>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <memory>
 #include <thread>

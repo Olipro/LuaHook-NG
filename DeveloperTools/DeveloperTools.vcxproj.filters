@@ -33,6 +33,12 @@
     <ClInclude Include="PipePair.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CyclicFuture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoJoinThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

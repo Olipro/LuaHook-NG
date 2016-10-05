@@ -32,6 +32,7 @@
 #include <string>
 #include <thread>
 #include <type_traits>
+#include <unordered_set>
 #include <vector>
 
 using namespace std::literals;

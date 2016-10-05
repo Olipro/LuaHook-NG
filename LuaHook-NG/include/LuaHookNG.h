@@ -9,8 +9,6 @@ namespace Olipro {
 
 		LuaInterface& GetLuaImplementation(const std::wstring&);
 		void LoadClientLibraries();
-		
-		static DWORD WINAPI DeferredInitialize(LPVOID);
 
 	public:
 		LuaHookNG(const std::wstring&);

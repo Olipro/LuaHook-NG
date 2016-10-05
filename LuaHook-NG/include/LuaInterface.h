@@ -53,6 +53,7 @@ namespace Olipro {
 		virtual int lua_pcall(lua_State*, int, int, int) = 0;
 		virtual void lua_pushboolean(lua_State*, int) = 0;
 		virtual void lua_pushcclosure(lua_State*, lua_CPPFunction, int) = 0;
+		virtual void lua_pushrawcclosure(lua_State*, lua_CFunction, int) = 0;
 		virtual const char* lua_pushfstring(lua_State*, const char *, ...) = 0;
 		virtual void lua_pushinteger(lua_State*, lua_Integer) = 0;
 		virtual void lua_pushlightuserdata(lua_State*, void*) = 0;

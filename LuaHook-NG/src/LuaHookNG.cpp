@@ -7,15 +7,7 @@ using namespace Olipro;
 LuaHookNG::LuaHookNG(const std::wstring& game) : 
 	luaInstance(GetLuaImplementation(game))
 {
-	CloseHandle(CreateThread(nullptr, 0, &DeferredInitialize,
-								this, 0, nullptr));
-}
-
-DWORD LuaHookNG::DeferredInitialize(LPVOID inst)
-{
-	auto&& self = *static_cast<LuaHookNG*>(inst);
-	self.LoadClientLibraries();
-	return 0;
+	LoadClientLibraries();
 }
 
 LuaInterface& LuaHookNG::GetLuaImplementation(const std::wstring& game)

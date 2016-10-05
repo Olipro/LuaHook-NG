@@ -24,12 +24,25 @@ LuaGameImpl::~LuaGameImpl()
 		instances.end());
 }
 
+template <typename T>
+void LuaGameImpl::CallWrapper(lua_State* L, LuaInterface& lua, T clbk)
+{
+	lua.lua_pushcclosure(L, [](lua_State* L, LuaInterface& lua) {
+		auto&& clbk = *reinterpret_cast<T>(lua.lua_touserdata(L, 1));
+		clbk(L, lua);
+		return 0;
+	}, 0);
+	lua.lua_pushlightuserdata(L, const_cast<void*>(
+		reinterpret_cast<const void*>(clbk)));
+	lua.lua_call(L, 1, 0);
+}
+
 void LuaGameImpl::OnGameTick(lua_State* L, LuaInterface& lua)
 {
 	std::shared_lock<decltype(mutex)> lock{ mutex };
 	for (auto&& inst : instances)
 		if (inst->gameTickClbk)
-			inst->gameTickClbk(L, lua);
+			CallWrapper(L, lua, &inst->gameTickClbk);
 }
 
 void LuaGameImpl::OnNewState(lua_State* L, LuaInterface& lua)
@@ -37,7 +50,7 @@ void LuaGameImpl::OnNewState(lua_State* L, LuaInterface& lua)
 	std::shared_lock<decltype(mutex)> lock{ mutex };
 	for (auto&& inst : instances)
 		if (inst->newStateClbk)
-			inst->newStateClbk(L, lua);
+			CallWrapper(L, lua, &inst->newStateClbk);
 }
 
 void LuaGameImpl::OnCloseState(lua_State* L, LuaInterface& lua)
@@ -45,7 +58,7 @@ void LuaGameImpl::OnCloseState(lua_State* L, LuaInterface& lua)
 	std::shared_lock<decltype(mutex)> lock{ mutex };
 	for (auto&& inst : instances)
 		if (inst->closeStateClbk)
-			inst->closeStateClbk(L, lua);
+			CallWrapper(L, lua, &inst->closeStateClbk);
 }
 
 void LuaGameImpl::OnRequire(lua_State*L, LuaInterface& lua,
@@ -53,6 +66,19 @@ void LuaGameImpl::OnRequire(lua_State*L, LuaInterface& lua,
 {
 	std::shared_lock<decltype(mutex)> lock{ mutex };
 	for (auto&& inst : instances)
-		if (inst->requireClbk)
-			inst->requireClbk(L, lua, name);
+		if (inst->requireClbk) {
+			lua.lua_pushcclosure(L, [](lua_State* L, LuaInterface& lua) {
+				auto&& clbk = *reinterpret_cast<
+					decltype(LuaGameImpl::requireClbk)*>(
+						lua.lua_touserdata(L, 1));
+				auto&& file = *reinterpret_cast<decltype(&name)>(
+					lua.lua_touserdata(L, 2));
+				clbk(L, lua, file);
+				return 0;
+			}, 0);
+			lua.lua_pushlightuserdata(L, const_cast<void*>(
+				reinterpret_cast<const void*>(&inst->requireClbk)));
+			lua.lua_pushlightuserdata(L, &const_cast<std::string&>(name));
+			lua.lua_call(L, 2, 0);
+		}
 }

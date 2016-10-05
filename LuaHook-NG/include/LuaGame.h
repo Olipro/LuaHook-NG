@@ -1,7 +1,6 @@
 #pragma once
 #include "LuaInterface.h"
 #include <functional>
-#include <functional>
 #include <memory>
 #include <string>
 #include "Lua.h"
@@ -20,10 +19,10 @@ namespace Olipro {
 
 	public:
 		struct CallbackArgs {
-			const std::function<void(lua_State*, LuaInterface&)> onTick;
-			const std::function<void(lua_State*, LuaInterface&)> onNew;
-			const std::function<void(lua_State*, LuaInterface&)> onClose;
-			const std::function<void(lua_State*, LuaInterface&,
+			std::function<void(lua_State*, LuaInterface&)> onTick;
+			std::function<void(lua_State*, LuaInterface&)> onNew;
+			std::function<void(lua_State*, LuaInterface&)> onClose;
+			std::function<void(lua_State*, LuaInterface&,
 											const std::string&)> onRequire;
 		};
 

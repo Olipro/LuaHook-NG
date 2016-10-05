@@ -38,6 +38,7 @@ namespace Olipro {
 			void(__fastcall &lua_createtable)(lua_State*, int, int);
 			int(__fastcall &lua_gc)(lua_State*, int, int);
 			void(__fastcall &lua_getfield)(lua_State*, int, const char*);
+			int(__fastcall &lua_getinfo)(lua_State*, const char*, lua_Debug*);
 			void(__fastcall &lua_gettable)(lua_State*, int);
 			void*(__fastcall &lua_newuserdata)(lua_State*, size_t);
 			size_t(__fastcall &lua_objlen)(lua_State*, int);
