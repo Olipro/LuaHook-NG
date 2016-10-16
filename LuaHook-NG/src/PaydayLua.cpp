@@ -322,7 +322,7 @@ void PaydayLua::lua_pushboolean(lua_State* L, int b)
 
 void PaydayLua::lua_pushcclosure(lua_State* L, lua_CPPFunction func, int nups)
 {
-	lua_pushlightuserdata(L, func);
+	lua_pushlightuserdata(L, reinterpret_cast<void*>(func));
 	lua_insert(L, -nups - 1);
 	lua_pushinteger(L, nups);
 	lua_insert(L, -nups - 1);
@@ -334,7 +334,8 @@ void PaydayLua::lua_pushcclosure(lua_State* L, lua_CPPFunction func, int nups)
 			lua.lua_pushvalue(L, lua_upvalueindex(i+2));
 		SafeCall(lua.inGame.functions.lua_pushcclosure, L, [](auto L) {
 			auto&& lua = Get();
-			auto f = static_cast<lua_CPPFunction>(lua.lua_touserdata(L, -1));
+			auto f = reinterpret_cast<lua_CPPFunction>(
+				lua.lua_touserdata(L, -1));
 			lua.lua_remove(L, -1);
 			lua.yieldCheck = {};
 			auto ret = f(L, lua);

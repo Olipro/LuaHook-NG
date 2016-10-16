@@ -2,6 +2,9 @@
 #include "stdafx.h"
 
 namespace Olipro {
+	//Functions implemented in UtilityAsm
+	void __fastcall SaveEsp(size_t*);
+	void __fastcall LoadEsp(size_t);
 
 	template <typename T>
 	using enable_if_void = std::enable_if_t<std::is_void<T>::value>;
@@ -13,9 +16,9 @@ namespace Olipro {
 	R SafeCall(T func, Args... args)
 	{
 		size_t savedEsp;
-		__asm mov savedEsp, esp
+		SaveEsp(&savedEsp);
 		auto ret = func(std::forward<Args>(args)...);
-		__asm mov esp, savedEsp
+		LoadEsp(savedEsp);
 		return ret;
 	}
 
@@ -24,32 +27,13 @@ namespace Olipro {
 	void SafeCall(T func, Args... args)
 	{
 		size_t savedEsp;
-		__asm mov savedEsp, esp
+		SaveEsp(&savedEsp);
 		func(std::forward<Args>(args)...);
-		__asm mov esp, savedEsp
+		LoadEsp(savedEsp);
 	}
 
 	constexpr auto Str2Uint(LPCSTR str)
 	{
-		return *reinterpret_cast<const int32_t*>(str);
+		return *reinterpret_cast<const int*> (str);
 	}
-
-	template <typename T>
-	class CompileTimeArray
-	{
-		typedef std::function<T(size_t elem)> get_t;
-		const get_t GetElement;
-		template <typename T, size_t ...args>
-		constexpr T FillArray(std::index_sequence<args...>, T) const
-		{
-			return{ GetElement(args)... };
-		}
-	public:
-		constexpr CompileTimeArray(get_t getter) : GetElement(getter) { }
-		template <typename T>
-		constexpr T FillArray(T type) const
-		{
-			return FillArray(std::make_index_sequence<type.max_size()>(), x);
-		}
-	};
 }

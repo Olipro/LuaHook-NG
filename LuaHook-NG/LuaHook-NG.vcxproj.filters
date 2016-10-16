@@ -19,6 +19,9 @@
     <Filter Include="Source Files\src">
       <UniqueIdentifier>{898f3126-b805-4094-bfae-e83094b9e545}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\asm">
+      <UniqueIdentifier>{c9cf570c-f469-4191-8575-a5f1cd89f2fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -89,5 +92,13 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\OldCode.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="src\Asm\UtilityAsm.asm">
+      <Filter>Source Files\asm</Filter>
+    </MASM>
+    <MASM Include="src\PaydayLua\InGameWin32Asm.asm">
+      <Filter>Source Files\asm</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

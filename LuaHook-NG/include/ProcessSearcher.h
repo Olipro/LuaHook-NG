@@ -1,4 +1,5 @@
 #pragma once
+#include <iomanip>
 
 namespace Olipro
 {
@@ -38,7 +39,7 @@ namespace Olipro
 			};
 			auto result = std::search(moduleBase, moduleBase + moduleSize,
 				needle, needle + signature.length(), predFunc);
-			obj = reinterpret_cast<T>(result != (ModuleBase + moduleSize) ?
+			obj = reinterpret_cast<T>(result != (moduleBase + moduleSize) ?
 				result : nullptr);
 			return obj;
 		}
@@ -62,8 +63,16 @@ namespace Olipro
 				signature.c_str());
 			auto result = std::search(moduleBase, moduleBase + moduleSize,
 				needle, needle + signature.length());
-			return *reinterpret_cast<std::add_pointer_t<T>>(
-				result != (moduleBase + moduleSize) ? result : nullptr);
+			auto ret = result != (moduleBase + moduleSize) ? result : nullptr;
+			if (ret == nullptr) {
+				std::ofstream file{ "missingsigs.txt", std::ios::app };
+				file << "not found: " << typeid(T).name();
+				for (auto i : signature)
+					file << std::hex << std::setfill('0') << std::setw(2)
+					<< static_cast<unsigned int>(static_cast<unsigned char>(i)) << " ";
+				file << "\n";
+			}
+			return *reinterpret_cast<std::add_pointer_t<T>>(ret);
 		}
 	};
 }

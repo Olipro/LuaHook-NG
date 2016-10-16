@@ -21,10 +21,11 @@ namespace Olipro {
 		static decltype(HookNewState)* tNewState;
 		static void __fastcall HookLuaClose(lua_State*);
 		static decltype(HookLuaClose)* tCloseState;
-		static void __cdecl HookLuaSetField(const char*);
-		static void(__fastcall *tlua_setfield)(lua_State*, int, const char*);
+		static void __fastcall HookLuaSetField(lua_State*, int, const char*);
+		static decltype(HookLuaSetField)* tlua_setfield;
 
 		static void __fastcall OnGameTick(lua_State*, const char*);
+		static void __fastcall OnLuaSetField(lua_State*, int, const char*);
 		static InGameHandling* self;
 
 	public:
@@ -49,6 +50,7 @@ namespace Olipro {
 			void(__fastcall &lua_rawset)(lua_State*, int);
 			void(__fastcall &lua_rawseti)(lua_State*, int, int);
 			void(__fastcall &lua_setfield)(lua_State*, int, const char*);
+			int(__fastcall &lua_setmetatable)(lua_State*, int);
 			void(__fastcall &lua_settop)(lua_State*, int);
 			const char*(__fastcall &lua_tolstring)(lua_State*, int, size_t*);
 			void(__fastcall &luaC_fullgc)(lua_State*);
@@ -66,8 +68,6 @@ namespace Olipro {
 				size_t, const char*);
 			int(__fastcall &luaL_loadfile)(lua_State*, const char*);
 			void(__fastcall &luaL_newstate)(lua_State**, int, int, int, int);
-			int(__fastcall &luaL_ref)(lua_State*, int);
-			void(__fastcall &luaL_unref)(lua_State*, int, int);
 			const char*(__fastcall &luaO_pushvfstring)(lua_State*,
 				const char*, va_list);
 			void(__fastcall &luaV_settable)(lua_State*, const TValue*,

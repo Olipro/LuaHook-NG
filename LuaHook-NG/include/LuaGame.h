@@ -9,6 +9,7 @@
 #pragma comment (lib, "LuaHook-NG.lib")
 #define EXTERNAL __declspec(dllimport)
 #endif
+#define LINKAGE __cdecl
 
 namespace Olipro {
 	class LuaGameImpl;
@@ -32,4 +33,4 @@ namespace Olipro {
 	};
 }
 
-extern "C" EXTERNAL void LuaHookNG(); //dummy function for forcing linkage.
+extern "C" EXTERNAL void LINKAGE LuaHookNG(); //dummy function to force linkage

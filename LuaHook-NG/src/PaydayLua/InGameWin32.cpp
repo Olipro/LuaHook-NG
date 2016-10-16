@@ -45,19 +45,6 @@ InGameHandling& InGameHandling::GetInstance()
 	return *self;
 }
 
-__declspec(naked) void* InGameHandling::HookDoGameTick(lua_State**, int, void*,
-	const char*)
-{
-	__asm {
-		mov edx, [esp+8]
-		push ecx
-		mov ecx, [ecx]
-		call OnGameTick
-		pop ecx
-		jmp tGameTick
-	}
-}
-
 void InGameHandling::OnGameTick(lua_State* L, const char* op)
 {
 	GetInstance().ProcessGameTick(L, op);
@@ -76,12 +63,8 @@ void InGameHandling::HookNewState(lua_State** L, int edx, int a, int b, int c)
 	self.ProcessNewState(*L);
 }
 
-void InGameHandling::HookLuaSetField(const char* k)
+void InGameHandling::OnLuaSetField(lua_State* L, int tbl, const char* k)
 {
-	lua_State *L;
-	int tbl;
-	__asm mov L, ecx
-	__asm mov tbl, edx
 	const std::string name = k;
 	if (tbl == LUA_GLOBALSINDEX && (name == "xpcall" || name == "pcall"))
 		Lua::lua_settop(L, -2);
@@ -134,6 +117,8 @@ InGameHandling::InGameFunctionSignatures InGameHandling::LoadSignatures()
 			"\x53\x56\x57\x8B\xF9\xE8\x86\xF5\xFF\xFF\xFF\x74\x24\x10\x8B\x77")
 		, s.FindFunction<decltype(IGFS::lua_setfield)>(
 			"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\x53\x56\x57\x8B\xF9\xE8\x8D")
+		, s.FindFunction<decltype(IGFS::lua_setmetatable)>(
+			"\x56\x57\x8B\xF1\xE8\x27\xF5\xFF\xFF\x8B\x4E\x08\x8B\xD0\x83\x79")
 		, s.FindFunction<decltype(IGFS::lua_settop)>(
 			"\x85\xD2\x78\x2E\x8B\x41\x0C\xC1\xE2\x03\x03\xC2\x39\x41\x08\x73")
 		, s.FindFunction<decltype(IGFS::lua_tolstring)>(
@@ -162,10 +147,6 @@ InGameHandling::InGameFunctionSignatures InGameHandling::LoadSignatures()
 			"\x55\x8B\xEC\x83\xE4\xF8\x81\xEC\x20\x02\x00\x00\x53\x55\x56\x57")
 		, s.FindFunction<decltype(IGFS::luaL_newstate)>(
 			"\x51\x8B\x44\x24\x10\x53\x56\x57\x8B\xF9\x85\xC0\x75\x07\xB9")
-		, s.FindFunction<decltype(IGFS::luaL_ref)>(
-			"\x83\xEC\x0C\x56\x8B\xF1\x57\x8B\x46\x08\x83\xC0\xF8\x3D\xB4\x2B")
-		, s.FindFunction<decltype(IGFS::luaL_unref)>(
-			"\x56\x57\x8B\x7C\x24\x0C\x8B\xF1\x85\xFF\x78\x5B\xBA\xF0\xD8\xFF")
 		, s.FindFunction<decltype(IGFS::luaO_pushvfstring)>(
 			"\x83\xEC\x38\x53\x55\x56\x8B\xDA\x57\xBD\x01\x00\x00\x00\xBA\xE5")
 		, s.FindFunction<decltype(IGFS::luaV_settable)>(
