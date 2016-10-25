@@ -4,6 +4,8 @@
 using namespace Olipro;
 
 std::vector<LuaGameImpl*> LuaGameImpl::instances;
+std::vector<std::remove_const_t<decltype(LuaGameImpl::gameTickClbk)>>
+	LuaGameImpl::tickClbks;
 std::shared_mutex LuaGameImpl::mutex;
 
 LuaGameImpl::LuaGameImpl(	decltype(gameTickClbk) tick,
@@ -15,13 +17,23 @@ LuaGameImpl::LuaGameImpl(	decltype(gameTickClbk) tick,
 {
 	std::unique_lock<decltype(mutex)> lock{ mutex };
 	instances.emplace_back(this);
+	if (gameTickClbk)
+		tickClbks.emplace_back(gameTickClbk);
 }
 
 LuaGameImpl::~LuaGameImpl()
 {
 	std::unique_lock<decltype(mutex)> lock{ mutex };
-	instances.erase(std::remove(instances.begin(), instances.end(), this),
-		instances.end());
+	instances.erase(std::find(instances.begin(), instances.end(), this));
+	if (gameTickClbk)
+		RebuildGameTickCallbacks();
+}
+
+void LuaGameImpl::RebuildGameTickCallbacks()
+{
+	tickClbks.clear();
+	for (auto i : instances)
+		tickClbks.emplace_back(i->gameTickClbk);
 }
 
 template <typename T>
@@ -40,9 +52,8 @@ void LuaGameImpl::CallWrapper(lua_State* L, LuaInterface& lua, T clbk)
 void LuaGameImpl::OnGameTick(lua_State* L, LuaInterface& lua)
 {
 	std::shared_lock<decltype(mutex)> lock{ mutex };
-	for (auto&& inst : instances)
-		if (inst->gameTickClbk)
-			CallWrapper(L, lua, &inst->gameTickClbk);
+	for (auto&& clbk : tickClbks)
+		CallWrapper(L, lua, &clbk);
 }
 
 void LuaGameImpl::OnNewState(lua_State* L, LuaInterface& lua)

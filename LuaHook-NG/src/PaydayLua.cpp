@@ -212,7 +212,7 @@ int PaydayLua::lua_error(lua_State* L)
 
 int PaydayLua::lua_gc(lua_State* L, int what, int data)
 {
-	return SafeCall(inGame.functions.lua_gc, L, data, what); //operands switched
+	return 0; //removed from PAYDAY 2 as of 2016-10-10
 }
 
 void PaydayLua::lua_getfield(lua_State* L, int idx, const char* name)
@@ -449,7 +449,7 @@ void PaydayLua::lua_replace(lua_State* L, int index)
 
 int PaydayLua::lua_resume(lua_State* L, int narg)
 {
-	return Lua::lua_resume(L, narg);
+	return SafeCall(inGame.functions.lua_resume, L, narg);
 }
 
 void PaydayLua::lua_setfield(lua_State* L, int index, const char* k)
