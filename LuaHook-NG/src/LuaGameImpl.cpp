@@ -33,7 +33,8 @@ void LuaGameImpl::RebuildGameTickCallbacks()
 {
 	tickClbks.clear();
 	for (auto i : instances)
-		tickClbks.emplace_back(i->gameTickClbk);
+		if(i->gameTickClbk)
+			tickClbks.emplace_back(i->gameTickClbk);
 }
 
 template <typename T>
