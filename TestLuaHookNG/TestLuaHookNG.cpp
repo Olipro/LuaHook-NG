@@ -203,6 +203,11 @@ TEST_F(TestCallbacks, TestLuaTableIterationWorks) {
 	DoWaitTest(2s);
 }
 
+TEST_F(TestCallbacks, TestLuaGameRebuildsTickCallbacksProperly) {
+	LuaGame game{ {} };
+	LuaGame{ {[](auto, auto&) {}} };
+}
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason,LPVOID lpReserved)
 {
 	switch (reason)
