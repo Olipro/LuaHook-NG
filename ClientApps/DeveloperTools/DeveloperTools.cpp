@@ -12,7 +12,7 @@ static DWORD __stdcall threadWrapper(LPVOID l) {
 }
 
 DeveloperTools::DeveloperTools() {
-	DWORD (*threadFunc)
+	DWORD(*threadFunc)
 	(LPVOID) = [](LPVOID) {
 		self.console.Run();
 		return 0ul;

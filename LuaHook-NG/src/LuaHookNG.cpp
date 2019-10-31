@@ -1,4 +1,5 @@
 #include "LuaHookNG.h"
+
 #include "Version.h"
 
 void LuaHookNG::LuaHook_NG() {}

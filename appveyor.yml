@@ -6,6 +6,12 @@ install:
 - cinst llvm
 build_script:
 - ps: >-
+    Get-ChildItem . -Recurse -Exclude out,.vs | where {$_.FullName -notmatch "out\\"} | where {$_.FullName -notmatch ".vs\\"} | where {$_.extension -eq ".cpp" -or $_.extension -eq ".h"} | ForEach-Object -Process { clang-format -style=file -i $_.FullName }
+
+    git diff --quiet
+
+    if (-not $?) { throw "Build failure. You have not applied Clang format to all of the source code." }
+
     $RELEASE_VER="0.0.1"
 
     if ($env:APPVEYOR_REPO_TAG -eq "true") { $RELEASE_VER = $env:APPVEYOR_REPO_TAG_NAME.Substring(1) }
