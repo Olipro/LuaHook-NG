@@ -1,5 +1,7 @@
 version: '{build}'
 image: Visual Studio 2019
+skip_commits:
+- message: /\[CI skip\]/
 install:
 - cinst llvm
 build_script:
