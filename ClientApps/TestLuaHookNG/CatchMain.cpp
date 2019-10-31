@@ -2,7 +2,6 @@
 #define CATCH_CONFIG_RUNNER
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-
 #include <shellapi.h>
 
 #include <catch.hpp>
@@ -47,7 +46,7 @@ void TestLuaHookNG::CatchMain() {
 	  static_cast<wchar_t**>(CommandLineToArgvW(cmdLine, &argc)),
 	  localFree};
 	session.applyCommandLine(argc, argv.get());
-	DWORD (*threadWorker)
+	DWORD(*threadWorker)
 	(void*) = [](void* arg) -> DWORD {
 		return session.run();
 	};

@@ -29,7 +29,7 @@ static std::string_view FindModuleBase() {
 class HookableFunc : public IHookable {
 	void* addr;
 
-   public:
+public:
 	HookableFunc(void* addr) : addr{addr} {}
 	void* Address() const noexcept override {
 		return addr;
@@ -37,12 +37,12 @@ class HookableFunc : public IHookable {
 };
 
 class HookedFunc : public IHooked {
-   protected:
+protected:
 	void* targetAddr;
 	void* detourAddr;
 	PDETOUR_TRAMPOLINE trampoline;
 
-   public:
+public:
 	HookedFunc(void* targetAddr,
 			   void* detourAddr,
 			   PDETOUR_TRAMPOLINE trampoline) :
@@ -62,7 +62,7 @@ class HookedFunc : public IHooked {
 };
 
 class SingleHook : public HookedFunc {
-   public:
+public:
 	SingleHook(void* tAddr, void* dtAddr) : HookedFunc{tAddr, dtAddr, nullptr} {
 		if (DetourTransactionBegin() != NO_ERROR)
 			throw std::runtime_error{
@@ -93,7 +93,7 @@ class SingleHook : public HookedFunc {
 class HookSet : public IHookSet {
 	std::vector<HookedFunc> hooks;
 
-   public:
+public:
 	HookSet(VecOfHooks&& toHook) {
 		hooks.reserve(toHook.size());
 		if (DetourTransactionBegin() != NO_ERROR)

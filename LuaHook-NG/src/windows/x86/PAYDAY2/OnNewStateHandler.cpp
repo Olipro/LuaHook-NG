@@ -16,10 +16,10 @@ using namespace LuaHookNG;
 using namespace std::literals;
 
 static void __fastcall LuaHookNG::OnNewState(lua_State** L,
-								  void* edx,
-								  void* a,
-								  void* b,
-								  void* c);
+											 void* edx,
+											 void* a,
+											 void* b,
+											 void* c);
 
 static std::unique_ptr<IHooked> hook;
 static std::unique_ptr<IHookable> luaSetField;
@@ -77,10 +77,10 @@ void OnNewStateHandler::Init(IRuntimeCodeHook& cHook) {
 }
 
 void __fastcall LuaHookNG::OnNewState(lua_State** L,
-						   void* edx,
-						   void* a,
-						   void* b,
-						   void* c) {
+									  void* edx,
+									  void* a,
+									  void* b,
+									  void* c) {
 	{
 		auto setFieldHook =
 		  codeHook->Hook(luaSetField,
