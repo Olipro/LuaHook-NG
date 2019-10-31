@@ -1,0 +1,41 @@
+version: '{build}'
+image: Visual Studio 2019
+install:
+- cinst llvm
+build_script:
+- ps: >-
+    $RELEASE_VER="0.0.1"
+
+    if ($env:APPVEYOR_REPO_TAG -eq "true") { $RELEASE_VER = $env:APPVEYOR_REPO_TAG_NAME.Substring(1) }
+
+    cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat`" && set > %TEMP%\vcvars.txt"
+
+    Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
+    
+    mkdir out
+
+    cd out
+
+    cmake -DRELEASE_VERSION="$RELEASE_VER" -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_ASM_MASM_COMPILER=ml.exe -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS="-flto -m32 /DWIN32 /D_WINDOWS /W3" -DCMAKE_CXX_FLAGS="-flto -m32 /DWIN32 /D_WINDOWS /W3 /GR /EHsc" -DCMAKE_LINKER=lld-link -DCMAKE_EXE_LINKER_FLAGS=/machine:X86 -DCMAKE_SHARED_LINKER_FLAGS=/machine:X86 -DCMAKE_STATIC_LINKER_FLAGS=/machine:X86 -DCMAKE_ASM_MASM_FLAGS=/safeseh -G Ninja ..
+
+    ninja
+
+    ninja install
+
+    cpack -D CPACK_INSTALL_CMAKE_PROJECTS=".;LuaHook-NG;ALL;." -D CPACK_PACKAGE_FILE_NAME="LuaHook-NG-$RELEASE_VER" -G ZIP .
+
+artifacts:
+- path: out\LuaHook-NG*.zip
+  name: LuaHook-NG
+deploy:
+- provider: GitHub
+  name: Tagged Release
+  on:
+    APPVEYOR_REPO_TAG: true
+    branch: master
+  description: 'LuaHook-NG Win32 Binary Release'
+  auth_token:
+    secure: NdI/6/+ZUR7V9sTXlqHoXdhSASoRnwfCZTmC1iOVJ75TP3NsU/A+RDW9QDTtgqjN
+  draft: false
+  prerelease: false
+  artifact: LuaHook-NG

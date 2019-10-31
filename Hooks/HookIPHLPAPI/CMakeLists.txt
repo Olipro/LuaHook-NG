@@ -1,0 +1,10 @@
+if(WIN32)
+	add_library(IPHLPAPI SHARED
+		HookIPHLPAPI.cpp HookIPHLPAPI.h
+)
+	target_link_libraries(IPHLPAPI PUBLIC LuaHookNG)
+	set_target_properties(IPHLPAPI PROPERTIES
+		CXX_STANDARD 17
+		CXX_STANDARD_REQUIRED YES)
+	install(TARGETS IPHLPAPI RUNTIME DESTINATION lib)
+endif()
